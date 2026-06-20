@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PANIHARI 🌿 | Pure Veg Luxury 3D Menu</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+
+    <style>
+        :root {
+            --gold: #D4AF37;
+            --emerald: #10b981;
+            --dark: #050505;
+            --cream: #fdfcf0;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(212, 175, 55, 0.2);
+        }
+        body {
+            background-color: var(--dark);
+            color: var(--cream);
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+        h1, h2, h3, .font-luxury { font-family: 'Cinzel', serif; }
+        .glass {
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--border);
+            border-radius: 1.5rem;
+        }
+        .gold-glow { text-shadow: 0 0 10px rgba(212, 175, 55, 0.5); }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: var(--dark); }
+        ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
+        #loader {
+            position: fixed; inset: 0; z-index: 100; background: #000;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+        .floating { animation: float 6s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+        #menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1.25rem; }
+        @media (min-width: 768px) { #menu-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); } }
+        .category-chips::-webkit-scrollbar { display: none; }
+        .active-chip { background: var(--gold) !important; color: var(--dark) !important; box-shadow: 0 0 20px rgba(212, 175, 55, 0.4); }
+        .food-card img { transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .food-card:hover img { transform: scale(1.1) translateY(-10px); }
+        .cart-fab {
+            position: fixed; bottom: 24px; right: 24px; z-index: 90; width: 64px; height: 64px;
+            border-radius: 50%; background: linear-gradient(135deg, #D4AF37, #b8941e); color: #050505;
+            display: none; align-items: center; justify-content: center; font-size: 1.5rem; cursor: pointer;
+            box-shadow: 0 8px 32px rgba(212, 175, 55, 0.5); transition: transform 0.2s ease;
+            animation: fabPulse 2s infinite;
+        }
+        .cart-fab:hover { transform: scale(1.1); }
+        .cart-fab:active { transform: scale(0.95); }
+        .cart-fab.visible { display: flex; }
+        @keyframes fabPulse {
+            0%, 100% { box-shadow: 0 8px 32px rgba(212, 175, 55, 0.5), 0 0 0 0 rgba(212, 175, 55, 0.4); }
+            50% { box-shadow: 0 8px 32px rgba(212, 175, 55, 0.5), 0 0 0 12px rgba(212, 175, 55, 0); }
+        }
+        .cart-badge {
+            position: absolute; top: -4px; right: -4px; min-width: 22px; height: 22px; border-radius: 50%;
+            background: #e63946; color: white; font-size: 11px; font-weight: 800;
+            display: flex; align-items: center; justify-content: center; border: 2px solid var(--dark);
+        }
+        .cart-overlay {
+            position: fixed; inset: 0; z-index: 150; background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px); display: none; opacity: 0; transition: opacity 0.3s ease;
+        }
+        .cart-overlay.open { display: block; opacity: 1; }
+        .cart-sheet {
+            position: fixed; bottom: 0; left: 0; right: 0; z-index: 160; background: #0d0d0d;
+            border-top: 1px solid var(--border); border-radius: 2rem 2rem 0 0; max-height: 85vh;
+            overflow-y: auto; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+        }
+        .cart-sheet.open { transform: translateY(0); }
+        .cart-sheet::-webkit-scrollbar { width: 3px; }
+        .cart-sheet::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
+        .qty-btn {
+            width: 30px; height: 30px; border-radius: 8px; background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1); color: var(--gold); display: flex;
+            align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s ease; font-size: 12px;
+        }
+        .qty-btn:hover { background: var(--gold); color: var(--dark); }
+        .qty-btn:active { transform: scale(0.9); }
+        .card-qty-controls { display: flex; align-items: center; gap: 8px; }
+        .card-qty-controls .qty-btn { width: 34px; height: 34px; border-radius: 10px; }
+        #success-overlay {
+            position: fixed; inset: 0; z-index: 200; background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(20px); display: none; align-items: center; justify-content: center;
+        }
+        #success-overlay.open { display: flex; }
+        .success-check {
+            width: 100px; height: 100px; border-radius: 50%;
+            background: linear-gradient(135deg, #10b981, #059669); display: flex;
+            align-items: center; justify-content: center;
+            box-shadow: 0 0 60px rgba(16, 185, 129, 0.4);
+            animation: successPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes successPop { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .success-ring {
+            position: absolute; width: 100px; height: 100px; border-radius: 50%;
+            border: 2px solid rgba(16, 185, 129, 0.3); animation: ringExpand 1s ease-out forwards;
+        }
+        @keyframes ringExpand { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(2.5); opacity: 0; } }
+        .btn-add-cart {
+            background: rgba(212, 175, 55, 0.08); color: var(--gold);
+            border: 1px solid rgba(212, 175, 55, 0.25); transition: all 0.25s ease;
+        }
+        .btn-add-cart:hover {
+            background: var(--gold); color: var(--dark); border-color: var(--gold);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+        }
+        .btn-add-cart:active { transform: scale(0.95); }
+        .btn-place-order {
+            background: linear-gradient(135deg, #D4AF37, #b8941e); color: var(--dark); transition: all 0.25s ease;
+        }
+        .btn-place-order:hover { box-shadow: 0 0 30px rgba(212, 175, 55, 0.5); transform: translateY(-2px); }
+        .btn-place-order:active { transform: scale(0.97); }
+        .btn-place-order:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+        #table-selector option { background: #111; color: var(--gold); }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div id="loader">
+        <div class="mb-4"><i class="fas fa-leaf text-emerald-500 text-5xl animate-bounce"></i></div>
+        <h1 class="text-4xl gold-glow font-luxury text-gold tracking-widest uppercase">PANIHARI</h1>
+        <div class="w-48 h-1 bg-gray-900 mt-6 rounded-full overflow-hidden">
+            <div id="loader-progress" class="w-0 h-full bg-gold shadow-[0_0_15px_gold]"></div>
+        </div>
+        <p class="mt-4 text-xs tracking-widest opacity-50 uppercase">Loading Luxury Experience</p>
+    </div>
+
+    <header class="fixed top-0 w-full z-50 px-4 py-4 pointer-events-none">
+        <div class="max-w-6xl mx-auto flex justify-between items-center pointer-events-auto">
+            <div class="glass px-6 py-2 border-gold/30 flex items-center gap-3">
+                <span class="text-emerald-500 drop-shadow-[0_0_5px_rgba(16,185,129,0.5)]"><i class="fas fa-leaf"></i></span>
+                <span class="font-luxury text-xl tracking-tighter text-gold">PANIHARI</span>
+            </div>
+            <div class="flex gap-2">
+                <select id="table-selector" class="glass px-4 py-2 border-gold/30 bg-transparent text-gold outline-none text-sm font-semibold cursor-pointer">
+                    <option value="T1">Table T1</option>
+                    <option value="T2">Table T2</option>
+                    <option value="T3">Table T3</option>
+                    <option value="T4">Table T4</option>
+                    <option value="T5">Table T5</option>
+                    <option value="T6">Table T6</option>
+                    <option value="T7">Table T7</option>
+                    <option value="T8">Table T8</option>
+                    <option value="T9">Table T9</option>
+                    <option value="T10">Table T10</option>
+                </select>
+                <button onclick="callWaiter()" class="glass px-4 py-2 border-gold/30 text-gold hover:bg-gold/10 transition-all">
+                    <i class="fas fa-bell mr-2"></i><span class="hidden md:inline">Waiter</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <section class="relative h-screen w-full flex flex-col justify-center items-center px-4 overflow-hidden pt-20">
+        <div class="absolute inset-0 z-0 overflow-hidden">
+            <div id="particle-container" class="absolute inset-0 opacity-30"></div>
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gold/10 rounded-full blur-[120px]"></div>
+        </div>
+        <div class="relative z-10 text-center max-w-4xl mx-auto">
+            <span class="text-gold tracking-[0.5rem] uppercase text-sm mb-4 block opacity-70">Experience Pure Vegetarian Bliss</span>
+            <h1 id="hero-title" class="text-6xl md:text-9xl font-luxury gold-glow mb-2 text-white">PANIHARI</h1>
+            <p id="hero-subtitle" class="text-emerald-500 font-luxury text-lg md:text-2xl tracking-[0.3rem] mb-8">PURE VEG FAMILY RESTAURANT</p>
+            <div class="flex flex-col md:flex-row gap-4 items-center justify-center">
+                <a href="#menu-anchor" class="bg-gold text-dark px-10 py-4 rounded-full font-bold tracking-widest hover:scale-110 transition-transform shadow-[0_0_30px_rgba(212,175,55,0.4)]">EXPLORE MENU</a>
+                <button onclick="scrollToBill()" class="glass border-gold/40 text-gold px-10 py-4 rounded-full font-bold tracking-widest hover:bg-gold/10 transition-all">REQUEST BILL</button>
+            </div>
+        </div>
+        <div class="absolute bottom-10 right-10 md:bottom-20 md:right-20 w-40 h-40 md:w-64 md:h-64 floating opacity-40">
+             <i class="fas fa-bowl-food text-8xl md:text-[12rem] text-gold/30"></i>
+        </div>
+    </section>
+
+    <div id="menu-anchor" class="pt-16"></div>
+    <section class="max-w-6xl mx-auto px-4 py-12">
+        <div class="sticky top-20 z-40 bg-dark/80 backdrop-blur-md py-4">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="flex-1 glass border-white/10 px-4 py-3 flex items-center gap-3">
+                    <i class="fas fa-search text-white/40"></i>
+                    <input type="text" id="menu-search" placeholder="Search dish name..." class="bg-transparent border-none outline-none w-full text-white placeholder:text-white/20">
+                </div>
+            </div>
+            <div class="category-chips overflow-x-auto flex gap-3 pb-2 mb-2">
+                <button onclick="filterMenu('all')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap active-chip transition-all">All Delights</button>
+                <button onclick="filterMenu('Punjabi')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">Punjabi Main</button>
+                <button onclick="filterMenu('Rajasthani Specials')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">Rajasthani Soul</button>
+                <button onclick="filterMenu('South Indian')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">South Essence</button>
+                <button onclick="filterMenu('Chinese')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">Chinese Wok</button>
+                <button onclick="filterMenu('Pizza & Burger')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">Global Bakes</button>
+                <button onclick="filterMenu('Fast Food')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">Street Bites</button>
+                <button onclick="filterMenu('Beverages')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">Drinks</button>
+                <button onclick="filterMenu('Desserts')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">Sweet Endings</button>
+            </div>
+        </div>
+        <div id="menu-grid" class="mt-8 pb-28"></div>
+    </section>
+
+    <button class="cart-fab" id="cartFab" onclick="openCart()">
+        <i class="fas fa-shopping-bag"></i>
+        <span class="cart-badge" id="cartBadge">0</span>
+    </button>
+
+    <div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
+    <div class="cart-sheet" id="cartSheet">
+        <div class="p-6 max-w-2xl mx-auto">
+            <div class="w-12 h-1 bg-white/10 rounded-full mx-auto mb-6"></div>
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="font-luxury text-2xl text-gold tracking-wider">YOUR ORDER</h2>
+                    <p class="text-xs text-white/30 mt-1" id="cartTableLabel">Table T1</p>
+                </div>
+                <button onclick="closeCart()" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-all">
+                    <i class="fas fa-times text-white/50"></i>
+                </button>
+            </div>
+            <div id="cartItemsList" class="space-y-3 mb-6"></div>
+            <div id="cartEmpty" class="text-center py-12 hidden">
+                <i class="fas fa-shopping-bag text-4xl text-white/10 mb-4"></i>
+                <p class="text-white/20 text-sm">Your cart is empty</p>
+                <p class="text-white/10 text-xs mt-1">Add items from the menu</p>
+            </div>
+            <div id="cartFooter" class="border-t border-white/5 pt-6">
+                <div class="space-y-2 mb-6">
+                    <div class="flex justify-between text-sm text-white/50"><span>Subtotal</span><span id="cartSubtotal">₹0</span></div>
+                    <div class="flex justify-between text-lg font-bold text-gold"><span>Total</span><span id="cartTotal">₹0</span></div>
+                </div>
+                <button id="placeOrderBtn" onclick="placeOrder()" class="btn-place-order w-full py-4 rounded-2xl font-bold text-sm tracking-widest flex items-center justify-center gap-2">
+                    <i class="fas fa-paper-plane"></i> PLACE ORDER
+                </button>
+                <p class="text-center text-[10px] text-white/15 mt-3 tracking-widest uppercase">Order will be sent directly to kitchen</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="success-overlay">
+        <div class="text-center px-6">
+            <div class="relative inline-flex items-center justify-center mb-8">
+                <div class="success-ring"></div>
+                <div class="success-ring" style="animation-delay: 0.2s"></div>
+                <div class="success-check"><i class="fas fa-check text-white text-4xl"></i></div>
+            </div>
+            <h2 class="font-luxury text-3xl text-gold tracking-wider mb-2">ORDER PLACED</h2>
+            <p class="text-white/40 text-sm mb-1" id="successTable">Table T1</p>
+            <p class="text-emerald-500 text-sm font-medium mb-8" id="successAmount">₹0</p>
+            <p class="text-white/25 text-xs max-w-xs mx-auto leading-relaxed mb-10">Aapka order kitchen me pahunch gaya hai. Waiter jaldi aapke paas aayega. Shukriya!</p>
+            <button onclick="closeSuccess()" class="bg-gold text-dark px-10 py-4 rounded-full font-bold tracking-widest hover:scale-110 transition-transform shadow-[0_0_30px_rgba(212,175,55,0.4)]">BACK TO MENU</button>
+        </div>
+    </div>
+
+    <footer class="bg-black/80 py-20 px-4 border-t border-white/5 mt-20">
+        <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 text-center md:text-left">
+            <div>
+                <h3 class="font-luxury text-gold text-2xl mb-6 tracking-widest uppercase">PANIHARI 🌿</h3>
+                <p class="text-sm opacity-50 leading-relaxed italic">"Tradition served with a touch of the future. The finest pure vegetarian dining experience in the city."</p>
+            </div>
+            <div>
+                <h4 class="text-xs uppercase tracking-[0.3rem] mb-6 opacity-30">Quick Info</h4>
+                <ul class="space-y-3 text-sm">
+                    <li><i class="fas fa-clock text-gold mr-3"></i> Open: 11:00 AM - 11:00 PM</li>
+                    <li><i class="fas fa-location-dot text-gold mr-3"></i> Main Market, Civil Lines</li>
+                    <li><i class="fas fa-phone text-gold mr-3"></i> +91 8107824842</li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-xs uppercase tracking-[0.3rem] mb-6 opacity-30">Social Hub</h4>
+                <div class="flex justify-center md:justify-start gap-4">
+                    <a href="#" class="glass w-10 h-10 flex items-center justify-center hover:bg-gold/20"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="glass w-10 h-10 flex items-center justify-center hover:bg-gold/20"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="glass w-10 h-10 flex items-center justify-center hover:bg-gold/20"><i class="fab fa-google"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="text-center mt-20 opacity-20 text-[10px] tracking-[0.5rem] uppercase">&copy; 2024 Panihari Restaurant | Digital Experience by LuxuryDev</div>
+    </footer>
+
+    <script>
+    // ==========================================
+    //  FIREBASE CONFIG — ALREADY ADDED
+    // ==========================================
+    const firebaseConfig = {
+        apiKey: "AIzaSyCjzN9CJOhCMff2CLpbLvUl66gf1a81Gw8",
+        authDomain: "panihari-orders.firebaseapp.com",
+        databaseURL: "https://panihari-orders-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "panihari-orders",
+        storageBucket: "panihari-orders.firebasestorage.app",
+        messagingSenderId: "886118460552",
+        appId: "1:886118460552:web:6c45c8b757d54ea484433d"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // ==========================================
+    //  MENU DATA
+    // ==========================================
+    const menuItems = [
+        { id: 1, name: "Paneer Butter Masala", price: 280, cat: "Punjabi", img: "https://images.unsplash.com/photo-1603894584214-4363297a7e80?auto=format&fit=crop&w=600&q=80" },
+        { id: 2, name: "Dal Makhani Fusion", price: 240, cat: "Punjabi", img: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=600&q=80" },
+        { id: 3, name: "Dal Baati Churma", price: 350, cat: "Rajasthani Specials", img: "https://images.unsplash.com/photo-1626074353765-517a681e40be?auto=format&fit=crop&w=600&q=80" },
+        { id: 4, name: "Gatta Curry Premium", price: 260, cat: "Rajasthani Specials", img: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?auto=format&fit=crop&w=600&q=80" },
+        { id: 5, name: "Hyderabadi Biryani", price: 320, cat: "Punjabi", img: "https://images.unsplash.com/photo-1563379091339-03b21bc4a4f8?auto=format&fit=crop&w=600&q=80" },
+        { id: 6, name: "Masala Dosa Crispy", price: 180, cat: "South Indian", img: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=600&q=80" },
+        { id: 7, name: "Paneer Chilli Dry", price: 220, cat: "Chinese", img: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?auto=format&fit=crop&w=600&q=80" },
+        { id: 8, name: "Hakka Noodles", price: 200, cat: "Chinese", img: "https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=600&q=80" },
+        { id: 9, name: "Farmhouse Pizza", price: 340, cat: "Pizza & Burger", img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=600&q=80" },
+        { id: 10, name: "Crispy Veg Burger", price: 150, cat: "Pizza & Burger", img: "https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=600&q=80" },
+        { id: 11, name: "Pav Bhaji Special", price: 160, cat: "Fast Food", img: "https://images.unsplash.com/photo-1606491956689-2ea866880c84?auto=format&fit=crop&w=600&q=80" },
+        { id: 12, name: "Chole Bhature", price: 210, cat: "Fast Food", img: "https://images.unsplash.com/photo-1505253149613-112d21d9f6a9?auto=format&fit=crop&w=600&q=80" },
+        { id: 13, name: "Mango Lassi", price: 90, cat: "Beverages", img: "https://images.unsplash.com/photo-1546173159-319746d518e4?auto=format&fit=crop&w=600&q=80" },
+        { id: 14, name: "Gulab Jamun with Ice", price: 120, cat: "Desserts", img: "https://images.unsplash.com/photo-1590080875515-8a3a8dc5735e?auto=format&fit=crop&w=600&q=80" },
+        { id: 15, name: "Shahi Paneer", price: 290, cat: "Punjabi", img: "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&w=600&q=80" },
+        { id: 16, name: "Idli Sambar", price: 130, cat: "South Indian", img: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?auto=format&fit=crop&w=600&q=80" },
+        { id: 17, name: "Paneer Tikka Pizza", price: 380, cat: "Pizza & Burger", img: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=600&q=80" },
+        { id: 18, name: "Dry Fruit Shake", price: 180, cat: "Beverages", img: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=600&q=80" },
+        { id: 19, name: "Ras Malai", price: 140, cat: "Desserts", img: "https://images.unsplash.com/photo-1610450537446-09a2503577d2?auto=format&fit=crop&w=600&q=80" },
+        { id: 20, name: "Kadhai Paneer", price: 280, cat: "Punjabi", img: "https://images.unsplash.com/photo-1603894584214-4363297a7e80?auto=format&fit=crop&w=600&q=80" },
+        { id: 21, name: "Ker Sangri Special", price: 320, cat: "Rajasthani Specials", img: "https://images.unsplash.com/photo-1626074353765-517a681e40be?auto=format&fit=crop&w=600&q=80" },
+        { id: 22, name: "Vada Sambar", price: 140, cat: "South Indian", img: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?auto=format&fit=crop&w=600&q=80" },
+        { id: 23, name: "Schezwan Fried Rice", price: 210, cat: "Chinese", img: "https://images.unsplash.com/photo-1512058560366-cd2427ff667f?auto=format&fit=crop&w=600&q=80" },
+        { id: 24, name: "Veg Spring Roll", price: 160, cat: "Chinese", img: "https://images.unsplash.com/photo-1606335192038-f5a05f761b3a?auto=format&fit=crop&w=600&q=80" },
+        { id: 25, name: "Paneer Burger Deluxe", price: 190, cat: "Pizza & Burger", img: "https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=600&q=80" },
+        { id: 26, name: "Pani Puri Platter", price: 100, cat: "Fast Food", img: "https://images.unsplash.com/photo-1601050638917-3d8442749298?auto=format&fit=crop&w=600&q=80" },
+        { id: 27, name: "Dahi Bhalla", price: 120, cat: "Fast Food", img: "https://images.unsplash.com/photo-1601050638917-3d8442749298?auto=format&fit=crop&w=600&q=80" },
+        { id: 28, name: "Virgin Mojito", price: 110, cat: "Beverages", img: "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=600&q=80" },
+        { id: 29, name: "Rabri Kulfi", price: 130, cat: "Desserts", img: "https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=600&q=80" },
+        { id: 30, name: "Moong Dal Halwa", price: 160, cat: "Desserts", img: "https://images.unsplash.com/photo-1605197775269-2f2238466bb4?auto=format&fit=crop&w=600&q=80" },
+        { id: 31, name: "Malai Kofta", price: 310, cat: "Punjabi", img: "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&w=600&q=80" },
+        { id: 32, name: "Paneer Pasanda", price: 330, cat: "Punjabi", img: "https://images.unsplash.com/photo-1603894584214-4363297a7e80?auto=format&fit=crop&w=600&q=80" },
+        { id: 33, name: "Rajasthani Thali", price: 499, cat: "Rajasthani Specials", img: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?auto=format&fit=crop&w=600&q=80" },
+        { id: 34, name: "Uttapam Mix Veg", price: 170, cat: "South Indian", img: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=600&q=80" },
+        { id: 35, name: "Veg Manchurian Dry", price: 190, cat: "Chinese", img: "https://images.unsplash.com/photo-1512058560366-cd2427ff667f?auto=format&fit=crop&w=600&q=80" },
+        { id: 36, name: "Garlic Mushroom", price: 230, cat: "Chinese", img: "https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=600&q=80" },
+        { id: 37, name: "Margherita Pizza", price: 280, cat: "Pizza & Burger", img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=600&q=80" },
+        { id: 38, name: "Aloo Tikki Burger", price: 90, cat: "Pizza & Burger", img: "https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=600&q=80" },
+        { id: 39, name: "Bhel Puri", price: 80, cat: "Fast Food", img: "https://images.unsplash.com/photo-1601050638917-3d8442749298?auto=format&fit=crop&w=600&q=80" },
+        { id: 40, name: "Cold Coffee Gold", price: 140, cat: "Beverages", img: "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=600&q=80" },
+        { id: 41, name: "Mixed Veg Curry", price: 240, cat: "Punjabi", img: "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&w=600&q=80" },
+        { id: 42, name: "Bhindi Masala", price: 200, cat: "Punjabi", img: "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&w=600&q=80" },
+        { id: 43, name: "Kaju Katli (2pc)", price: 60, cat: "Desserts", img: "https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=600&q=80" },
+        { id: 44, name: "Pineapple Juice", price: 100, cat: "Beverages", img: "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=600&q=80" },
+        { id: 45, name: "Cheese Chilli Toast", price: 140, cat: "Fast Food", img: "https://images.unsplash.com/photo-1606491956689-2ea866880c84?auto=format&fit=crop&w=600&q=80" },
+        { id: 46, name: "Kheer Thandi", price: 110, cat: "Desserts", img: "https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=600&q=80" },
+        { id: 47, name: "Jeera Rice", price: 160, cat: "Punjabi", img: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=600&q=80" },
+        { id: 48, name: "Onion Rava Dosa", price: 200, cat: "South Indian", img: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=600&q=80" },
+        { id: 49, name: "Govind Gatta", price: 280, cat: "Rajasthani Specials", img: "https://images.unsplash.com/photo-1626074353765-517a681e40be?auto=format&fit=crop&w=600&q=80" },
+        { id: 50, name: "Royal Falooda", price: 220, cat: "Desserts", img: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=600&q=80" }
+    ];
+
+    let currentCategory = 'all';
+    let searchQuery = '';
+    let cart = {};
+
+    // NFC se table auto-detect
+    const urlParams = new URLSearchParams(window.location.search);
+    const nfcTable = urlParams.get('table');
+    if (nfcTable) {
+        const sel = document.getElementById('table-selector');
+        for (let opt of sel.options) {
+            if (opt.value.toUpperCase() === nfcTable.toUpperCase()) { sel.value = opt.value; break; }
+        }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => { initLoader(); initParticles(); renderMenu(); initAnimations(); setupSearch(); });
+
+    function initLoader() {
+        let progress = 0; const bar = document.getElementById('loader-progress');
+        const interval = setInterval(() => {
+            progress += 20; if (progress >= 100) { progress = 100; clearInterval(interval);
+            gsap.to('#loader', { opacity: 0, duration: 0.5, onComplete: () => { document.getElementById('loader').style.display = 'none'; document.body.style.overflow = 'auto'; } }); }
+            bar.style.width = progress + '%';
+        }, 50);
+    }
+
+    function initParticles() {
+        const container = document.getElementById('particle-container');
+        for (let i = 0; i < 20; i++) {
+            const p = document.createElement('div'); p.className = 'absolute bg-gold rounded-full opacity-20';
+            const size = Math.random() * 4 + 2; p.style.width = size + 'px'; p.style.height = size + 'px';
+            p.style.left = Math.random() * 100 + '%'; p.style.top = Math.random() * 100 + '%'; container.appendChild(p);
+            gsap.to(p, { y: 'random(-100, 100)', x: 'random(-100, 100)', duration: 'random(5, 10)', repeat: -1, yoyo: true, ease: 'sine.inOut' });
+        }
+    }
+
+    function filterMenu(cat) {
+        currentCategory = cat;
+        document.querySelectorAll('.cat-chip').forEach(chip => {
+            chip.classList.remove('active-chip');
+            if (chip.innerText.toLowerCase().includes(cat.split(' ')[0].toLowerCase()) || (cat === 'all' && chip.innerText.toLowerCase().includes('all'))) chip.classList.add('active-chip');
+        }); renderMenu();
+    }
+
+    function setupSearch() { document.getElementById('menu-search').addEventListener('input', (e) => { searchQuery = e.target.value.toLowerCase(); renderMenu(); }); }
+    function initAnimations() { gsap.from("#hero-title", { opacity: 0, y: 100, duration: 1, ease: "power4.out", delay: 0.5 }); gsap.from("#hero-subtitle", { opacity: 0, x: -50, duration: 1, ease: "power4.out", delay: 0.8 }); }
+
+    function renderMenu() {
+        const grid = document.getElementById('menu-grid');
+        const filtered = menuItems.filter(item => { const matchCat = currentCategory === 'all' || item.cat === currentCategory; const matchSearch = item.name.toLowerCase().includes(searchQuery); return matchCat && matchSearch; });
+        grid.innerHTML = filtered.map(item => {
+            const inCart = cart[item.id];
+            return `<div class="food-card glass p-3 md:p-5 group" id="food-card-${item.id}">
+                <div class="relative overflow-hidden rounded-xl h-32 md:h-48 mb-4">
+                    <img src="${item.img}" alt="${item.name}" loading="lazy" class="w-full h-full object-cover rounded-xl transition-transform duration-500">
+                    <div class="absolute top-3 left-3 bg-black/60 backdrop-blur-md px-2 py-1 rounded-md border border-emerald-500/30 flex items-center gap-1">
+                        <i class="fas fa-circle text-[8px] text-emerald-500"></i><span class="text-[8px] font-bold tracking-widest text-white uppercase">Veg</span>
+                    </div>
+                </div>
+                <div class="space-y-1">
+                    <h3 class="text-sm md:text-lg font-luxury text-white truncate group-hover:text-gold transition-colors">${item.name}</h3>
+                    <p class="text-[10px] uppercase tracking-widest opacity-40">${item.cat}</p>
+                    <div class="flex flex-col gap-2 pt-2">
+                        <span class="text-gold font-bold md:text-xl">₹${item.price}</span>
+                        ${inCart ? `<div class="card-qty-controls"><button class="qty-btn" onclick="changeQty(${item.id}, -1)"><i class="fas fa-minus"></i></button><span class="text-gold font-bold text-sm min-w-[20px] text-center">${inCart.qty}</span><button class="qty-btn" onclick="changeQty(${item.id}, 1)"><i class="fas fa-plus"></i></button></div>` : `<button onclick="addToCart(${item.id})" class="btn-add-cart w-full py-2 md:py-3 rounded-lg flex items-center justify-center font-bold text-sm tracking-widest"><i class="fas fa-plus mr-2"></i>ADD</button>`}
+                    </div>
+                </div></div>`;
+        }).join('');
+    }
+
+    function addToCart(id) {
+        const item = menuItems.find(i => i.id === id); if (!item) return;
+        cart[id] = { ...item, qty: 1 }; updateCartUI(); renderMenu();
+        const card = document.getElementById(`food-card-${id}`);
+        if (card) gsap.fromTo(card, { scale: 0.95 }, { scale: 1, duration: 0.3, ease: "back.out(1.7)" });
+    }
+
+    function changeQty(id, delta) {
+        if (!cart[id]) return; cart[id].qty += delta;
+        if (cart[id].qty <= 0) delete cart[id];
+        updateCartUI(); renderMenu(); renderCartSheet();
+    }
+
+    function getCartTotal() { return Object.values(cart).reduce((s, i) => s + (i.price * i.qty), 0); }
+    function getCartCount() { return Object.values(cart).reduce((s, i) => s + i.qty, 0); }
+
+    function updateCartUI() {
+        const count = getCartCount(); const fab = document.getElementById('cartFab'); const badge = document.getElementById('cartBadge');
+        if (count > 0) { fab.classList.add('visible'); badge.textContent = count; } else { fab.classList.remove('visible'); }
+    }
+
+    function openCart() {
+        renderCartSheet(); document.getElementById('cartTableLabel').textContent = 'Table ' + document.getElementById('table-selector').value;
+        document.getElementById('cartOverlay').classList.add('open'); document.getElementById('cartSheet').classList.add('open'); document.body.style.overflow = 'hidden';
+    }
+    function closeCart() { document.getElementById('cartOverlay').classList.remove('open'); document.getElementById('cartSheet').classList.remove('open'); document.body.style.overflow = 'auto'; }
+
+    function renderCartSheet() {
+        const list = document.getElementById('cartItemsList'); const emptyEl = document.getElementById('cartEmpty'); const footerEl = document.getElementById('cartFooter');
+        const items = Object.values(cart);
+        if (items.length === 0) { list.innerHTML = ''; emptyEl.classList.remove('hidden'); footerEl.style.display = 'none'; return; }
+        emptyEl.classList.add('hidden'); footerEl.style.display = 'block';
+        let total = 0;
+        list.innerHTML = items.map(item => { const sub = item.price * item.qty; total += sub;
+            return `<div class="flex items-center gap-4 bg-white/[0.02] border border-white/5 rounded-2xl p-4">
+                <img src="${item.img}" class="w-16 h-16 rounded-xl object-cover flex-shrink-0" alt="${item.name}">
+                <div class="flex-1 min-w-0"><h4 class="text-sm font-semibold text-white truncate">${item.name}</h4><p class="text-xs text-white/30 mt-0.5">₹${item.price} × ${item.qty}</p><p class="text-gold font-bold text-sm mt-1">₹${sub}</p></div>
+                <div class="flex items-center gap-2 flex-shrink-0"><button class="qty-btn" onclick="changeQty(${item.id}, -1)"><i class="fas fa-minus"></i></button><span class="text-gold font-bold text-sm min-w-[20px] text-center">${item.qty}</span><button class="qty-btn" onclick="changeQty(${item.id}, 1)"><i class="fas fa-plus"></i></button></div></div>`;
+        }).join('');
+        document.getElementById('cartSubtotal').textContent = '₹' + total; document.getElementById('cartTotal').textContent = '₹' + total;
+    }
+
+    function placeOrder() {
+        const items = Object.values(cart); if (items.length === 0) return;
+        const btn = document.getElementById('placeOrderBtn'); btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>PLACING ORDER...';
+        const table = document.getElementById('table-selector').value; const total = getCartTotal();
+        const orderData = {
+            table: table, items: items.map(i => ({ name: i.name, qty: i.qty, price: i.price, subtotal: i.price * i.qty })),
+            total: total, status: "pending", timestamp: Date.now(),
+            time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
+            date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
+        };
+        db.ref('orders').push(orderData).then(() => {
+            closeCart(); showSuccessScreen(table, total); cart = {}; updateCartUI(); renderMenu();
+            btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>PLACE ORDER';
+        }).catch((err) => { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>PLACE ORDER'; showToast('Order fail! Internet check karo.'); console.error(err); });
+    }
+
+    function showSuccessScreen(table, total) {
+        document.getElementById('successTable').textContent = 'Table ' + table; document.getElementById('successAmount').textContent = 'Total: ₹' + total;
+        document.getElementById('success-overlay').classList.add('open'); document.body.style.overflow = 'hidden';
+    }
+    function closeSuccess() { document.getElementById('success-overlay').classList.remove('open'); document.body.style.overflow = 'auto'; }
+
+    function showToast(msg) {
+        const toast = document.createElement('div'); toast.className = 'fixed top-24 left-1/2 -translate-x-1/2 glass border-gold/50 text-gold px-6 py-3 z-[300] font-bold shadow-2xl text-sm';
+        toast.innerText = msg; document.body.appendChild(toast); gsap.from(toast, { y: -50, opacity: 0 });
+        setTimeout(() => { gsap.to(toast, { y: -50, opacity: 0, onComplete: () => toast.remove() }); }, 3000);
+    }
+    function callWaiter() { const table = document.getElementById('table-selector').value; showToast(`Assistance requested for ${table}. A waiter is on the way!`); }
+    function scrollToBill() { showToast("Bill request sent to counter. Please wait..."); }
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeCart(); closeSuccess(); } });
+    </script>
+</body>
+</html>

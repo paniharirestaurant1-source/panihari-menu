@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PANIHARI Owner — Live Orders</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+    <style>
+        :root { --gold: #D4AF37; --dark: #050505; --cream: #fdfcf0; }
+        * { font-family: 'Poppins', sans-serif; margin: 0; box-sizing: border-box; }
+        h1, h2, h3, .font-luxury { font-family: 'Cinzel', serif; }
+        body { background: var(--dark); color: var(--cream); min-height: 100vh; }
+        ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: var(--dark); } ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
+        .order-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 1.5rem; transition: all 0.3s ease; }
+        .order-card.new-order { border-color: var(--gold); box-shadow: 0 0 40px rgba(212, 175, 55, 0.15); animation: newPulse 1.5s ease 3; }
+        @keyframes newPulse { 0%, 100% { box-shadow: 0 0 40px rgba(212, 175, 55, 0.15); } 50% { box-shadow: 0 0 60px rgba(212, 175, 55, 0.35); } }
+        .table-badge { background: linear-gradient(135deg, #D4AF37, #b8941e); min-width: 60px; min-height: 60px; }
+        .st-pending { color: #f59e0b; background: rgba(245,158,11,0.1); }
+        .st-preparing { color: #3b82f6; background: rgba(59,130,246,0.1); }
+        .st-ready { color: #22c55e; background: rgba(34,197,94,0.1); }
+        .st-done { color: #6b7280; background: rgba(107,114,128,0.1); }
+        .btn-next { transition: all 0.2s ease; } .btn-next:hover { transform: scale(1.05); filter: brightness(1.15); } .btn-next:active { transform: scale(0.95); }
+        .toast-in { animation: toastSlide 0.5s cubic-bezier(0.32, 0.72, 0, 1) forwards; }
+        .toast-out { animation: toastOut 0.4s ease forwards; }
+        @keyframes toastSlide { from { opacity: 0; transform: translateX(120px) scale(0.9); } to { opacity: 1; transform: translateX(0) scale(1); } }
+        @keyframes toastOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(120px); } }
+        .glass-header { background: rgba(5,5,5,0.9); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(212,175,55,0.15); }
+    </style>
+</head>
+<body>
+    <header class="glass-header sticky top-0 z-50 px-4 py-4">
+        <div class="max-w-4xl mx-auto flex items-center justify-between">
+            <div>
+                <h1 class="text-lg md:text-xl font-luxury tracking-widest" style="color:var(--gold)"><i class="fas fa-leaf text-emerald-500 mr-2"></i>PANIHARI ORDERS</h1>
+                <p class="text-[10px] text-white/20 tracking-widest uppercase mt-0.5">Real-time kitchen dashboard</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="text-right">
+                    <p class="text-[10px] text-white/30 uppercase tracking-widest">Pending</p>
+                    <p id="pendingCount" class="text-3xl font-black" style="color:var(--gold)">0</p>
+                </div>
+                <button onclick="toggleSound()" class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:border-yellow-600 transition-all" title="Toggle Sound">
+                    <i class="fas fa-volume-up text-sm text-white/50" id="soundIcon"></i>
+                </button>
+                <button onclick="clearDone()" class="px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-white/40 hover:border-yellow-600 hover:text-white/70 transition-all hidden md:flex items-center gap-1">
+                    <i class="fas fa-broom"></i> Clear Done
+                </button>
+            </div>
+        </div>
+        <p class="text-center text-[10px] text-white/10 mt-2" id="lastUpdate">Connecting to kitchen...</p>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 py-6 space-y-4 pb-8" id="ordersList">
+        <div class="text-center py-24">
+            <i class="fas fa-satellite-dish text-5xl text-white/5 mb-6"></i>
+            <p class="text-white/15 text-sm">Kitchen connected. Waiting for orders...</p>
+            <p class="text-white/8 text-xs mt-2">Jab koi table se order karega, yahan dikh jayega</p>
+        </div>
+    </main>
+
+    <div id="toastBox" class="fixed top-24 right-4 z-[200] space-y-3 w-80 pointer-events-none"></div>
+
+    <script>
+    // ==========================================
+    //  FIREBASE CONFIG — ALREADY ADDED (SAME)
+    // ==========================================
+    const firebaseConfig = {
+        apiKey: "AIzaSyCjzN9CJOhCMff2CLpbLvUl66gf1a81Gw8",
+        authDomain: "panihari-orders.firebaseapp.com",
+        databaseURL: "https://panihari-orders-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "panihari-orders",
+        storageBucket: "panihari-orders.firebasestorage.app",
+        messagingSenderId: "886118460552",
+        appId: "1:886118460552:web:6c45c8b757d54ea484433d"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let allOrders = {};
+    let soundOn = true;
+    const knownIds = new Set();
+
+    function playDing() {
+        if (!soundOn) return;
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            [880, 1100, 1320].forEach((freq, i) => {
+                const osc = ctx.createOscillator(); const gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination); osc.frequency.value = freq; osc.type = 'sine';
+                gain.gain.value = 0.25; gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.2 + 0.25);
+                osc.start(ctx.currentTime + i * 0.2); osc.stop(ctx.currentTime + i * 0.2 + 0.25);
+            });
+        } catch(e) {}
+    }
+
+    function toggleSound() {
+        soundOn = !soundOn;
+        document.getElementById('soundIcon').className = soundOn ? 'fas fa-volume-up text-sm text-white/50' : 'fas fa-volume-mute text-sm text-white/30';
+    }
+
+    if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
+    function browserNotif(order) {
+        if (Notification.permission !== 'granted') return;
+        const items = order.items.map(i => `${i.name} x${i.qty}`).join(', ');
+        new Notification(`PANIHARI — Table ${order.table}`, {
+            body: `${items}\nTotal: ₹${order.total}`,
+            icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🌿</text></svg>',
+            tag: 'order-' + Date.now(), requireInteraction: true
+        });
+    }
+
+    db.ref('orders').orderByChild('timestamp').on('value', (snapshot) => {
+        allOrders = snapshot.val() || {}; renderOrders(); updatePending();
+        Object.entries(allOrders).forEach(([id, order]) => {
+            if (!knownIds.has(id)) { knownIds.add(id); if (order.status === 'pending') { playDing(); showToast(order); browserNotif(order); } }
+        });
+        document.getElementById('lastUpdate').textContent = 'Last sync: ' + new Date().toLocaleTimeString('en-IN');
+    });
+
+    function renderOrders() {
+        const container = document.getElementById('ordersList');
+        const entries = Object.entries(allOrders).sort((a, b) => b[1].timestamp - a[1].timestamp);
+        if (entries.length === 0) { container.innerHTML = '<div class="text-center py-24"><i class="fas fa-satellite-dish text-5xl text-white/5 mb-6"></i><p class="text-white/15 text-sm">Kitchen connected. Waiting for orders...</p></div>'; return; }
+        container.innerHTML = entries.map(([id, o]) => {
+            const isNew = o.status === 'pending'; const stClass = 'st-' + o.status;
+            const itemsHtml = o.items.map(i => `<div class="flex justify-between text-sm"><span class="text-white/60">${i.name} <span class="text-white/25">×${i.qty}</span></span><span class="text-white/40">₹${i.subtotal}</span></div>`).join('');
+            let nextSt='', nextLabel='', nextBg='', nextIcon='';
+            if (o.status==='pending') { nextSt='preparing'; nextLabel='Start Preparing'; nextBg='bg-blue-600'; nextIcon='fa-fire'; }
+            else if (o.status==='preparing') { nextSt='ready'; nextLabel='Ready'; nextBg='bg-emerald-600'; nextIcon='fa-check'; }
+            else if (o.status==='ready') { nextSt='done'; nextLabel='Served'; nextBg='bg-gray-600'; nextIcon='fa-utensils'; }
+            return `<div class="order-card p-5 ${isNew ? 'new-order' : ''}" id="ord-${id}">
+                <div class="flex gap-4">
+                    <div class="table-badge rounded-2xl flex flex-col items-center justify-center flex-shrink-0">
+                        <span class="text-[9px] text-black/60 font-bold tracking-widest">TABLE</span><span class="text-xl font-black text-black">${o.table.replace('T','')}</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase ${stClass}">${o.status}</span>
+                                <span class="text-[11px] text-white/20"><i class="far fa-clock mr-1"></i>${o.time}</span>
+                                ${o.date ? `<span class="text-[11px] text-white/15">${o.date}</span>` : ''}
+                            </div>
+                            <span class="text-xl font-black" style="color:var(--gold)">₹${o.total}</span>
+                        </div>
+                        <div class="space-y-1.5 mb-4">${itemsHtml}</div>
+                        ${nextSt ? `<button onclick="nextStatus('${id}','${nextSt}')" class="btn-next ${nextBg} px-5 py-2.5 rounded-xl text-sm font-bold text-white flex items-center gap-2"><i class="fas ${nextIcon}"></i>${nextLabel}</button>` : `<span class="text-xs text-white/20 flex items-center gap-1"><i class="fas fa-check-circle text-emerald-600"></i> Order Complete</span>`}
+                    </div>
+                </div></div>`;
+        }).join('');
+    }
+
+    function nextStatus(id, status) {
+        db.ref(`orders/${id}/status`).set(status).then(() => { const el = document.getElementById(`ord-${id}`); if (el) el.classList.remove('new-order'); }).catch(e => console.error(e));
+    }
+
+    function updatePending() {
+        const n = Object.values(allOrders).filter(o => o.status === 'pending').length;
+        document.getElementById('pendingCount').textContent = n;
+        document.title = n > 0 ? `(${n}) PANIHARI Orders` : 'PANIHARI Orders';
+    }
+
+    function clearDone() {
+        const done = Object.entries(allOrders).filter(([_, o]) => o.status === 'done');
+        if (!done.length) return; if (!confirm(`${done.length} completed orders delete karein?`)) return;
+        done.forEach(([id]) => db.ref(`orders/${id}`).remove());
+    }
+
+    function showToast(order) {
+        const box = document.getElementById('toastBox'); const itemsStr = order.items.map(i => `${i.name} ×${i.qty}`).join(', ');
+        const t = document.createElement('div'); t.className = 'toast-in pointer-events-auto rounded-2xl p-4 border';
+        t.style.cssText = 'background:rgba(13,13,13,0.95);border-color:rgba(212,175,55,0.4);backdrop-filter:blur(20px);box-shadow:0 20px 60px rgba(0,0,0,0.5);';
+        t.innerHTML = `<div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:linear-gradient(135deg,#D4AF37,#b8941e)"><i class="fas fa-bell text-black text-sm"></i></div>
+            <div class="flex-1 min-w-0"><p class="text-xs font-bold tracking-widest" style="color:var(--gold)">NEW ORDER — TABLE ${order.table.replace('T','')}</p><p class="text-[11px] text-white/40 mt-1 truncate">${itemsStr}</p><p class="text-lg font-black mt-1" style="color:var(--gold)">₹${order.total}</p></div>
+            <button onclick="this.closest('.toast-in,.toast-out').remove()" class="text-white/20 hover:text-white/60 transition-colors flex-shrink-0 mt-1"><i class="fas fa-times text-xs"></i></button></div>`;
+        box.appendChild(t);
+        setTimeout(() => { t.classList.remove('toast-in'); t.classList.add('toast-out'); setTimeout(() => t.remove(), 400); }, 10000);
+    }
+    </script>
+</body>
+</html>
