@@ -126,7 +126,12 @@
         .btn-place-order:hover { box-shadow: 0 0 30px rgba(212, 175, 55, 0.5); transform: translateY(-2px); }
         .btn-place-order:active { transform: scale(0.97); }
         .btn-place-order:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
-        #table-selector option { background: #111; color: var(--gold); }
+        .table-chip {
+            background: linear-gradient(135deg, #D4AF37, #b8941e);
+            color: #050505;
+            font-weight: 800;
+            letter-spacing: 0.15em;
+        }
     </style>
 </head>
 <body class="antialiased">
@@ -140,25 +145,18 @@
         <p class="mt-4 text-xs tracking-widest opacity-50 uppercase">Loading Luxury Experience</p>
     </div>
 
+    <!-- HEADER — Table selector HATA DIYA, sirf naam aur waiter button -->
     <header class="fixed top-0 w-full z-50 px-4 py-4 pointer-events-none">
         <div class="max-w-6xl mx-auto flex justify-between items-center pointer-events-auto">
             <div class="glass px-6 py-2 border-gold/30 flex items-center gap-3">
                 <span class="text-emerald-500 drop-shadow-[0_0_5px_rgba(16,185,129,0.5)]"><i class="fas fa-leaf"></i></span>
                 <span class="font-luxury text-xl tracking-tighter text-gold">PANIHARI</span>
             </div>
-            <div class="flex gap-2">
-                <select id="table-selector" class="glass px-4 py-2 border-gold/30 bg-transparent text-gold outline-none text-sm font-semibold cursor-pointer">
-                    <option value="T1">Table T1</option>
-                    <option value="T2">Table T2</option>
-                    <option value="T3">Table T3</option>
-                    <option value="T4">Table T4</option>
-                    <option value="T5">Table T5</option>
-                    <option value="T6">Table T6</option>
-                    <option value="T7">Table T7</option>
-                    <option value="T8">Table T8</option>
-                    <option value="T9">Table T9</option>
-                    <option value="T10">Table T10</option>
-                </select>
+            <div class="flex gap-2 items-center">
+                <!-- NFC se aaya table number yahan dikhega -->
+                <div class="table-chip glass px-4 py-2 rounded-xl text-sm" id="tableChip">
+                    TABLE 1
+                </div>
                 <button onclick="callWaiter()" class="glass px-4 py-2 border-gold/30 text-gold hover:bg-gold/10 transition-all">
                     <i class="fas fa-bell mr-2"></i><span class="hidden md:inline">Waiter</span>
                 </button>
@@ -289,7 +287,7 @@
 
     <script>
     // ==========================================
-    //  FIREBASE CONFIG — ALREADY ADDED
+    //  FIREBASE CONFIG
     // ==========================================
     const firebaseConfig = {
         apiKey: "AIzaSyCjzN9CJOhCMff2CLpbLvUl66gf1a81Gw8",
@@ -363,17 +361,23 @@
     let searchQuery = '';
     let cart = {};
 
-    // NFC se table auto-detect
+    // ==========================================
+    //  NFC SE TABLE AUTO-DETECT — Dropdown hataya
+    // ==========================================
+    let currentTable = 'T1'; // Default
     const urlParams = new URLSearchParams(window.location.search);
     const nfcTable = urlParams.get('table');
     if (nfcTable) {
-        const sel = document.getElementById('table-selector');
-        for (let opt of sel.options) {
-            if (opt.value.toUpperCase() === nfcTable.toUpperCase()) { sel.value = opt.value; break; }
-        }
+        const validTables = ['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10'];
+        const match = validTables.find(t => t.toUpperCase() === nfcTable.toUpperCase());
+        if (match) currentTable = match;
     }
 
-    window.addEventListener('DOMContentLoaded', () => { initLoader(); initParticles(); renderMenu(); initAnimations(); setupSearch(); });
+    window.addEventListener('DOMContentLoaded', () => {
+        // Header me table number chip update karo
+        document.getElementById('tableChip').textContent = 'TABLE ' + currentTable.replace('T', '');
+        initLoader(); initParticles(); renderMenu(); initAnimations(); setupSearch();
+    });
 
     function initLoader() {
         let progress = 0; const bar = document.getElementById('loader-progress');
@@ -450,7 +454,8 @@
     }
 
     function openCart() {
-        renderCartSheet(); document.getElementById('cartTableLabel').textContent = 'Table ' + document.getElementById('table-selector').value;
+        renderCartSheet();
+        document.getElementById('cartTableLabel').textContent = 'Table ' + currentTable;
         document.getElementById('cartOverlay').classList.add('open'); document.getElementById('cartSheet').classList.add('open'); document.body.style.overflow = 'hidden';
     }
     function closeCart() { document.getElementById('cartOverlay').classList.remove('open'); document.getElementById('cartSheet').classList.remove('open'); document.body.style.overflow = 'auto'; }
@@ -473,15 +478,15 @@
     function placeOrder() {
         const items = Object.values(cart); if (items.length === 0) return;
         const btn = document.getElementById('placeOrderBtn'); btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>PLACING ORDER...';
-        const table = document.getElementById('table-selector').value; const total = getCartTotal();
+        const total = getCartTotal();
         const orderData = {
-            table: table, items: items.map(i => ({ name: i.name, qty: i.qty, price: i.price, subtotal: i.price * i.qty })),
+            table: currentTable, items: items.map(i => ({ name: i.name, qty: i.qty, price: i.price, subtotal: i.price * i.qty })),
             total: total, status: "pending", timestamp: Date.now(),
             time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
             date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
         };
         db.ref('orders').push(orderData).then(() => {
-            closeCart(); showSuccessScreen(table, total); cart = {}; updateCartUI(); renderMenu();
+            closeCart(); showSuccessScreen(currentTable, total); cart = {}; updateCartUI(); renderMenu();
             btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>PLACE ORDER';
         }).catch((err) => { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>PLACE ORDER'; showToast('Order fail! Internet check karo.'); console.error(err); });
     }
@@ -497,7 +502,7 @@
         toast.innerText = msg; document.body.appendChild(toast); gsap.from(toast, { y: -50, opacity: 0 });
         setTimeout(() => { gsap.to(toast, { y: -50, opacity: 0, onComplete: () => toast.remove() }); }, 3000);
     }
-    function callWaiter() { const table = document.getElementById('table-selector').value; showToast(`Assistance requested for ${table}. A waiter is on the way!`); }
+    function callWaiter() { showToast(`Assistance requested for Table ${currentTable}. A waiter is on the way!`); }
     function scrollToBill() { showToast("Bill request sent to counter. Please wait..."); }
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeCart(); closeSuccess(); } });
     </script>
