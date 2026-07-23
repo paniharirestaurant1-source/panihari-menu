@@ -223,31 +223,92 @@
     let knownOrderIds = new Set();
 
     // ===== SOUND BEEP =====
-    function playBeep() {
-        if (!soundEnabled) return;
-        try {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.connect(gain); gain.connect(ctx.destination);
-            osc.frequency.value = 880; osc.type = 'sine';
-            gain.gain.value = 0.3;
-            osc.start();
-            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
-            osc.stop(ctx.currentTime + 0.5);
-            // Dobara beep thoda der me
-            setTimeout(() => {
+   // ===== 10 SEC BELL SOUND =====
+function playBellAlarm10Sec() {
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const startTime = ctx.currentTime;
+        const endTime = startTime + 10; // 10 second tak chalega
+
+        // Bell jarurat - har 0.8 sec me ek ding
+        function scheduleBell(from, to) {
+            let t = from;
+            while (t < to) {
+                // Main bell tone
+                const osc1 = ctx.createOscillator();
+                const gain1 = ctx.createGain();
+                osc1.connect(gain1); gain1.connect(ctx.destination);
+                osc1.frequency.value = 880;
+                osc1.type = 'sine';
+                gain1.gain.setValueAtTime(0, t);
+                gain1.gain.linearRampToValueAtTime(0.35, t + 0.02);
+                gain1.gain.exponentialRampToValueAtTime(0.001, t + 0.6);
+                osc1.start(t);
+                osc1.stop(t + 0.6);
+
+                // Harmonic (richer bell sound)
                 const osc2 = ctx.createOscillator();
                 const gain2 = ctx.createGain();
                 osc2.connect(gain2); gain2.connect(ctx.destination);
-                osc2.frequency.value = 1100; osc2.type = 'sine';
-                gain2.gain.value = 0.3;
-                osc2.start();
-                gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
-                osc2.stop(ctx.currentTime + 0.4);
-            }, 200);
-        } catch(e) {}
-    }
+                osc2.frequency.value = 1320;
+                osc2.type = 'sine';
+                gain2.gain.setValueAtTime(0, t);
+                gain2.gain.linearRampToValueAtTime(0.15, t + 0.02);
+                gain2.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+                osc2.start(t);
+                osc2.stop(t + 0.4);
+
+                // Third harmonic
+                const osc3 = ctx.createOscillator();
+                const gain3 = ctx.createGain();
+                osc3.connect(gain3); gain3.connect(ctx.destination);
+                osc3.frequency.value = 2640;
+                osc3.type = 'sine';
+                gain3.gain.setValueAtTime(0, t);
+                gain3.gain.linearRampToValueAtTime(0.08, t + 0.01);
+                gain3.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+                osc3.start(t);
+                osc3.stop(t + 0.25);
+
+                t += 0.8; // har 0.8 sec me ding
+            }
+        }
+
+        scheduleBell(startTime, endTime);
+
+        // 10 sec baad khud band ho jayega
+        setTimeout(() => {
+            try { ctx.close(); } catch(e) {}
+        }, 10500);
+
+    } catch(e) {}
+}
+
+// Normal short beep (naye order ke liye)
+function playBeep() {
+    if (!soundEnabled) return;
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.frequency.value = 880; osc.type = 'sine';
+        gain.gain.value = 0.3;
+        osc.start();
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+        osc.stop(ctx.currentTime + 0.5);
+        setTimeout(() => {
+            const osc2 = ctx.createOscillator();
+            const gain2 = ctx.createGain();
+            osc2.connect(gain2); gain2.connect(ctx.destination);
+            osc2.frequency.value = 1100; osc2.type = 'sine';
+            gain2.gain.value = 0.3;
+            osc2.start();
+            gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+            osc2.stop(ctx.currentTime + 0.4);
+        }, 200);
+    } catch(e) {}
+}
 
     function toggleSound() {
         soundEnabled = !soundEnabled;
@@ -535,17 +596,20 @@
     });
 
     // ===== WAITER CALLS LISTENER =====
-    db.ref('waiter_calls').on('child_added', (snapshot) => {
-        const call = snapshot.val();
-        if (call && call.table) {
+db.ref('waiter_calls').on('child_added', (snapshot) => {
+    const call = snapshot.val();
+    if (call && call.table) {
+        // Agar longSound true hai toh 10 sec bell, nahi toh short beep
+        if (call.longSound && soundEnabled) {
+            playBellAlarm10Sec();
+        } else {
             playBeep();
-            showToast(`Waiter Called - TABLE ${call.table}`);
-            // Auto delete after 10 sec
-            setTimeout(() => {
-                snapshot.ref.remove().catch(() => {});
-            }, 10000);
         }
-    });
+        showToast(`🔔 Waiter Called - TABLE ${call.table}`);
+        // 12 sec baad delete (10 sec sound + 2 sec buffer)
+        setTimeout(() => { snapshot.ref.remove().catch(() => {}); }, 12000);
+    }
+});
 
     // ===== BILL REQUESTS LISTENER =====
     db.ref('bill_requests').on('child_added', (snapshot) => {
