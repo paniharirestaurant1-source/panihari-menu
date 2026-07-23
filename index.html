@@ -118,31 +118,31 @@
                 </div>
             </div>
             <div class="category-chips overflow-x-auto flex gap-3 pb-2 mb-2">
-                <button onclick="filterMenu('all')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap active-chip transition-all">All</button>
-                <button onclick="filterMenu('Thali')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">Thali</button>
-                <button onclick="filterMenu('Chat')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">Chat</button>
-                <button onclick="filterMenu('Soup')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">Soups</button>
-                <button onclick="filterMenu('Starters')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">Starters</button>
-                <button onclick="filterMenu('Paneer')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">Paneer</button>
-                <button onclick="filterMenu('Vegetable')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">Vegetable</button>
-                <button onclick="filterMenu('Indian Food')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">Indian Food</button>
-                <button onclick="filterMenu('Tandoor')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">Tandoor</button>
-                <button onclick="filterMenu('Rice')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">Rice</button>
-                <button onclick="filterMenu('Raita & Salad')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">Raita & Salad</button>
-                <button onclick="filterMenu('South Indian')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">South Indian</button>
-                <button onclick="filterMenu('Chinese')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">Chinese</button>
-                <button onclick="filterMenu('Pizza & Pasta')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">Pizza & Pasta</button>
-                <button onclick="filterMenu('Burger & Sandwich')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">Burger</button>
-                <button onclick="filterMenu('Beverages')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">Beverages</button>
-                <button onclick="filterMenu('Sweets')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">Sweets</button>
-                <button onclick="filterMenu('Ice Cream')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">Ice Cream</button>
+                <button data-category="all" onclick="filterMenu('all')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap active-chip transition-all">All</button>
+                <button data-category="Thali" onclick="filterMenu('Thali')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">Thali</button>
+                <button data-category="Chat" onclick="filterMenu('Chat')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">Chat</button>
+                <button data-category="Soup" onclick="filterMenu('Soup')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">Soups</button>
+                <button data-category="Starters" onclick="filterMenu('Starters')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">Starters</button>
+                <button data-category="Paneer" onclick="filterMenu('Paneer')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">Paneer</button>
+                <button data-category="Vegetable" onclick="filterMenu('Vegetable')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">Vegetable</button>
+                <button data-category="Indian Food" onclick="filterMenu('Indian Food')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">Indian Food</button>
+                <button data-category="Tandoor" onclick="filterMenu('Tandoor')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">Tandoor</button>
+                <button data-category="Rice" onclick="filterMenu('Rice')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">Rice</button>
+                <button data-category="Raita &amp; Salad" onclick="filterMenu('Raita & Salad')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">Raita &amp; Salad</button>
+                <button data-category="South Indian" onclick="filterMenu('South Indian')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">South Indian</button>
+                <button data-category="Chinese" onclick="filterMenu('Chinese')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">Chinese</button>
+                <button data-category="Pizza &amp; Pasta" onclick="filterMenu('Pizza & Pasta')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">Pizza &amp; Pasta</button>
+                <button data-category="Burger &amp; Sandwich" onclick="filterMenu('Burger & Sandwich')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">Burger &amp; Sandwich</button>
+                <button data-category="Beverages" onclick="filterMenu('Beverages')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">Beverages</button>
+                <button data-category="Sweets" onclick="filterMenu('Sweets')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">Sweets</button>
+                <button data-category="Ice Cream" onclick="filterMenu('Ice Cream')" class="cat-chip glass px-6 py-3 border-white/10 whitespace-nowrap transition-all">Ice Cream</button>
             </div>
         </div>
         <div id="menu-grid" class="mt-8 pb-28"></div>
     </section>
 
     <button class="cart-fab" id="cartFab" onclick="openCart()">
-        <i class="fas fa-shopping-bag"></i>
+        <i class="fas fa-utensils" aria-label="Food order"></i>
         <span class="cart-badge" id="cartBadge">0</span>
     </button>
 
@@ -161,7 +161,7 @@
             </div>
             <div id="cartItemsList" class="space-y-3 mb-6"></div>
             <div id="cartEmpty" class="text-center py-12 hidden">
-                <i class="fas fa-shopping-bag text-4xl text-white/10 mb-4"></i>
+                <i class="fas fa-utensils text-4xl text-white/10 mb-4"></i>
                 <p class="text-white/20 text-sm">Your cart is empty</p>
             </div>
             <div id="cartFooter" class="border-t border-white/5 pt-6">
@@ -232,141 +232,264 @@
     const db = firebase.database();
 
     // ==========================================
-    //  MENU — 107+ ITEMS WITH 100% WORKING HD IMAGES
+    //  MENU — 221 ITEMS
     // ==========================================
     const menuItems = [
-        // THALI
-        { id: 1, name: "Panihari Special Thali", price: 290, cat: "Thali", img: "https://i.pinimg.com/1200x/75/25/c2/7525c28b815e93b8f4ad4a3bb889090e.jpg" },
-        { id: 2, name: "Rajasthani Special Thali", price: 390, cat: "Thali", img: "https://i.pinimg.com/1200x/12/69/e0/1269e0b4a3f9fca01532e5103206f818.jpg" },
-        { id: 3, name: "Sadha Thali", price: 170, cat: "Thali", img: "https://i.pinimg.com/736x/19/59/1e/19591ea701f97f169932b065b2cfcbb7.jpg" },
-        
-        // CHAT
-        { id: 4, name: "Roasted Papad", price: 30, cat: "Chat", img: "https://i.pinimg.com/736x/46/c7/34/46c734327102be72a82a57a70cacc2f8.jpg" },
-        { id: 5, name: "Aloo Chat", price: 100, cat: "Chat", img: "https://i.pinimg.com/736x/46/65/6f/46656f5b1edcd4920dfad64a8e5e0656.jpg" },
-        
-        // SOUP
-        { id: 6, name: "Tomato Soup", price: 100, cat: "Soup", img: "https://i.pinimg.com/736x/32/e2/b0/32e2b01c923bd8a575289ae494b15e20.jpg" },
-        { id: 7, name: "Cream of Tomato Soup", price: 110, cat: "Soup", img: "https://i.pinimg.com/736x/35/15/1c/35151ceb28e67fc5c4429bef45e10bf1.jpg" },
-        
-        // STARTERS
-        { id: 8, name: "Veg. Pakora", price: 110, cat: "Starters", img: "https://i.pinimg.com/236x/cd/ec/b0/cdecb069da79c020394555fe56956685.jpg" },
-        
-        // PANEER (HD Images added)
-        { id: 9, name: "Paneer Butter Masala", price: 250, cat: "Paneer", img: "https://i.pinimg.com/736x/a4/bd/11/a4bd11b6a94c349721ec4a41dfd39b46.jpg" },
-        { id: 10, name: "Kadhai Paneer", price: 250, cat: "Paneer", img: "https://i.pinimg.com/736x/bf/3b/22/bf3b22653efb4bcf54d76ffec4df1fd5.jpg" },
-        { id: 11, name: "Shahi Paneer", price: 250, cat: "Paneer", img: "https://i.pinimg.com/736x/81/44/11/814411b5168371b764c738d8b64fd782.jpg" },
-        { id: 12, name: "Paneer Tikka Masala", price: 260, cat: "Paneer", img: "https://i.pinimg.com/736x/22/de/db/22dedb83c61d1401f5708b136acca044.jpg" },
-        { id: 13, name: "Paneer Do Pyaza", price: 250, cat: "Paneer", img: "https://i.pinimg.com/736x/49/11/e6/4911e68fcf66f1472f3e0c43b320d99f.jpg" },
-        { id: 14, name: "Paneer Lababdar", price: 260, cat: "Paneer", img: "https://i.pinimg.com/1200x/99/16/e4/9916e4512c37747b8bc97aaa14c1a1a8.jpg" },
-        { id: 15, name: "Handi Paneer", price: 250, cat: "Paneer", img: "https://i.pinimg.com/736x/da/e1/96/dae1968e4a7cb30939b11f0766d713b3.jpg" },
-        { id: 16, name: "Paneer Pasanda", price: 260, cat: "Paneer", img: "https://i.pinimg.com/webp/1200x/a4/34/76/a4347675268395a308c9b62ed9c3ddb5.webp" },
-        
-        // VEGETABLE
-        { id: 17, name: "Dal Fry", price: 150, cat: "Vegetable", img: "https://i.pinimg.com/1200x/71/3c/0f/713c0f6adf6432396b2b56994149c18e.jpg" },
-        { id: 18, name: "Dal Makhani", price: 200, cat: "Vegetable", img: "https://i.pinimg.com/736x/0b/db/80/0bdb8089947e91e3010444b44be0cc79.jpg" },
-        { id: 19, name: "Mix Veg", price: 180, cat: "Vegetable", img: "https://i.pinimg.com/1200x/3e/59/39/3e59398cbd1555b64cd67691c0bf6624.jpg" },
-        { id: 20, name: "Kashmiri Dum Aloo", price: 180, cat: "Vegetable", img: "https://i.pinimg.com/736x/da/08/b6/da08b6f9fce2c4b6851ee33d6a7c7d33.jpg" },
-        { id: 21, name: "Aloo Gobi Masala", price: 170, cat: "Vegetable", img: "https://i.pinimg.com/1200x/3f/8a/e0/3f8ae022c5f0da71bc41ad181708eaad.jpg" },
-        { id: 22, name: "Aloo Jeera", price: 150, cat: "Vegetable", img: "https://i.pinimg.com/736x/4b/cc/ce/4bcccefa90b137ff4e903f6103760b8e.jpg" },
-        { id: 23, name: "Malai Kofta", price: 220, cat: "Vegetable", img: "https://i.pinimg.com/736x/62/3f/94/623f941ae8675b7e76eb1a021e8233e1.jpg" },
-        { id: 24, name: "Chole Masala", price: 170, cat: "Vegetable", img: "https://i.pinimg.com/736x/7b/8b/9d/7b8b9d1bfe18c813629c8a6ede18fbc8.jpg" },
-        { id: 25, name: "Bhindi Masala", price: 170, cat: "Vegetable", img: "https://i.pinimg.com/1200x/77/e8/70/77e870eefb74f8afb5c64ddf2acdc689.jpg" },
-        { id: 26, name: "Matar Mushroom", price: 200, cat: "Vegetable", img: "https://i.pinimg.com/236x/97/40/17/974017b924f1e94646e3d62023581d03.jpg" },
-        { id: 27, name: "Methi Malai Mutter", price: 200, cat: "Vegetable", img: "https://i.pinimg.com/1200x/61/39/ff/6139ff0e880bb086f9c50380717bab51.jpg" },
-        
-        // INDIAN FOOD
-        { id: 28, name: "Dal Baati Churma", price: 250, cat: "Indian Food", img: "https://i.pinimg.com/736x/de/50/b0/de50b00836640def75ffe32190bdb7f2.jpg" },
-        { id: 29, name: "Gatta Curry", price: 200, cat: "Indian Food", img: "https://i.pinimg.com/736x/a9/c2/2d/a9c22d6e8985f2c5a4820d3cb7ec9ca0.jpg" },
-        { id: 30, name: "Papad Ki Sabzi", price: 150, cat: "Indian Food", img: "https://i.pinimg.com/736x/86/ef/17/86ef17abab45bfb56c4a74d9da2c5e49.jpg" },
-        { id: 31, name: "Ker Sangri", price: 200, cat: "Indian Food", img: "https://i.pinimg.com/1200x/86/b1/86/86b18638c4313c2101e4f3bf8baae020.jpg" },
-        { id: 32, name: "Govind Gatta", price: 220, cat: "Indian Food", img: "https://i.pinimg.com/736x/7c/8f/7b/7c8f7b3867b47ae34dcbfa2400180772.jpg" },
-        
-        // TANDOOR
-        { id: 33, name: "Tawa Roti Plain", price: 20, cat: "Tandoor", img: "https://i.pinimg.com/736x/cf/38/2e/cf382ef1b71efdadb829b643348cc52d.jpg" },
-        { id: 34, name: "Tandoori Roti Butter", price: 25, cat: "Tandoor", img: "https://i.pinimg.com/736x/38/2c/ca/382ccadb06b651b9d2ddbf051a054d3a.jpg" },
-        { id: 35, name: "Tawa Roti Butter", price: 25, cat: "Tandoor", img: "https://i.pinimg.com/1200x/3e/50/62/3e50627c871fffec5749f41a7a25ec5a.jpg" },
-        { id: 36, name: "Butter Naan", price: 50, cat: "Tandoor", img: "https://i.pinimg.com/736x/fb/a1/ab/fba1abc348e524089bbbbbcbf4a561ec.jpg" },
-        { id: 37, name: "Garlic Naan", price: 60, cat: "Tandoor", img: "https://i.pinimg.com/736x/fb/a1/ab/fba1abc348e524089bbbbbcbf4a561ec.jpg" },
-        { id: 38, name: "Cheese Naan", price: 80, cat: "Tandoor", img: "https://i.pinimg.com/1200x/1c/a6/c1/1ca6c100275644142a7e9efb099a59da.jpg" },
-        { id: 39, name: "Laccha Paratha", price: 50, cat: "Tandoor", img: "https://i.pinimg.com/1200x/51/0b/05/510b05d77442118674682532c1ddb0f7.jpg" },
-        { id: 40, name: "Missi Roti", price: 30, cat: "Tandoor", img: "https://i.pinimg.com/1200x/5e/2f/3e/5e2f3e38e58ed3004fcd959995148500.jpg" },
-        
-        // RICE
-        { id: 41, name: "Plain Rice", price: 120, cat: "Rice", img: "https://i.pinimg.com/webp/1200x/bf/b9/4b/bfb94b8934e15f5529a44be1952cddcf.webp" },
-        { id: 42, name: "Jeera Rice", price: 150, cat: "Rice", img: "https://i.pinimg.com/1200x/43/f4/3e/43f43e81b5bd816b5d112973c98c07ed.jpg" },
-        { id: 43, name: "Veg. Biryani", price: 200, cat: "Rice", img: "https://i.pinimg.com/1200x/d9/68/72/d9687291cdf24450284204493887f476.jpg" },
-        { id: 44, name: "Hyderabadi Biryani", price: 250, cat: "Rice", img: "https://i.pinimg.com/1200x/d5/86/35/d586358286c136c9dcd4dabbdd8606fb.jpg" },
-        
-        // RAITA & SALAD
-        { id: 45, name: "Plain Curd", price: 50, cat: "Raita & Salad", img: "https://i.pinimg.com/1200x/e1/a8/93/e1a8938742d45b268d9cea69d55afea6.jpg" },
-        { id: 46, name: "Veg. Raita", price: 70, cat: "Raita & Salad", img: "https://i.pinimg.com/1200x/59/91/bc/5991bca69f61d1b558e2874b032c661e.jpg" },
-        { id: 47, name: "Green Salad", price: 80, cat: "Raita & Salad", img: "https://i.pinimg.com/736x/8c/24/3c/8c243cc8e49925b96f1cac71cd39de6d.jpg" },
-        { id: 48, name: "Cucumber Salad", price: 80, cat: "Raita & Salad", img: "https://i.pinimg.com/1200x/89/de/4f/89de4fcbe1f2ad8239f98d122c6ae278.jpg" },
-        
-        // SOUTH INDIAN
-        { id: 49, name: "Plain Dosa", price: 100, cat: "South Indian", img: "https://i.pinimg.com/736x/da/26/07/da2607596434e098807784328419a85d.jpg" },
-        { id: 50, name: "Masala Dosa", price: 140, cat: "South Indian", img: "https://i.pinimg.com/736x/d4/d0/55/d4d05510d95f793fd27855bbe5851f20.jpg" },
-        { id: 51, name: "Mysore Masala Dosa", price: 160, cat: "South Indian", img: "https://i.pinimg.com/736x/ef/9b/8a/ef9b8a221cc10389cd49824878d38eb6.jpg" },
-        { id: 52, name: "Paper Dosa", price: 150, cat: "South Indian", img: "https://i.pinimg.com/736x/d1/6d/2d/d16d2d333fa52a4cd01ab67636fb7a1b.jpg" },
-        { id: 53, name: "Onion Uttapam", price: 130, cat: "South Indian", img: "https://i.pinimg.com/736x/08/5f/14/085f14555cc84e0515b3b21a21ba346c.jpg" },
-        { id: 54, name: "Idli Sambhar (4pc)", price: 100, cat: "South Indian", img: "https://i.pinimg.com/736x/37/1c/ca/371ccade9b34b5fcd4046dd14e2c80f3.jpg" },
-        { id: 55, name: "Vada Sambhar (3pc)", price: 110, cat: "South Indian", img: "https://i.pinimg.com/webp/1200x/65/c1/5a/65c15ad61ed5523439dfebcbb8651057.webp" },
-        
-        // CHINESE
-        { id: 56, name: "French Fries", price: 120, cat: "Chinese", img: "https://i.pinimg.com/736x/63/ca/c4/63cac4a1c2ba62a7db43c4cfc85ecbbb.jpg" },
-        { id: 57, name: "Veg. Chowmein", price: 150, cat: "Chinese", img: "https://i.pinimg.com/1200x/4a/4d/90/4a4d900d13f548f007da11b4029c98c6.jpg" },
-        { id: 58, name: "Veg. Fried Rice", price: 160, cat: "Chinese", img: "https://i.pinimg.com/1200x/86/f5/ab/86f5ab1bd8492d9786bb23773dfe74c1.jpg" },
-        { id: 59, name: "Hakka Noodles", price: 160, cat: "Chinese", img: "https://i.pinimg.com/736x/dc/a4/b9/dca4b9f1476906f09432ef91b58274a6.jpg" },
-        { id: 60, name: "Schezwan Noodles", price: 170, cat: "Chinese", img: "https://i.pinimg.com/1200x/43/a2/de/43a2de4d5260a4213317e6f4869f1dac.jpg" },
-        { id: 61, name: "Veg. Manchurian Dry", price: 170, cat: "Chinese", img: "https://i.pinimg.com/736x/d2/26/09/d22609efc42984ac31068cafc8f9427b.jpg" },
-        { id: 62, name: "Veg. Manchurian Gravy", price: 180, cat: "Chinese", img: "https://i.pinimg.com/1200x/94/6d/10/946d10e6e2a429e95e4ff5075331e1a7.jpg" },
-        { id: 63, name: "Chilli Paneer Dry", price: 200, cat: "Chinese", img: "https://i.pinimg.com/736x/3a/c2/c2/3ac2c2a6568d14872dabb53b42277549.jpg" },
-        { id: 64, name: "Chilli Paneer Gravy", price: 210, cat: "Chinese", img: "https://i.pinimg.com/1200x/91/07/4d/91074de772c37f1b6de34c746acf2943.jpg" },
-        { id: 65, name: "Spring Roll (4pc)", price: 150, cat: "Chinese", img: "https://i.pinimg.com/1200x/05/3f/40/053f4013f35602b8a051b6b774fa603c.jpg" },
-        
-        // PIZZA & PASTA
-        { id: 66, name: "Garlic Bread", price: 120, cat: "Pizza & Pasta", img: "https://i.pinimg.com/webp/736x/38/19/a1/3819a163d2ae93ea60f4a3c85d821cf1.webp" },
-        { id: 67, name: "Margherita Pizza", price: 200, cat: "Pizza & Pasta", img: "https://i.pinimg.com/1200x/87/d3/dc/87d3dc0225d21869daf72e1f9a198ba4.jpg" },
-        { id: 68, name: "Veggie Pizza", price: 250, cat: "Pizza & Pasta", img: "https://i.pinimg.com/736x/26/a9/5e/26a95ed34502045b50e7b452f7e733cd.jpg" },
-        { id: 69, name: "Paneer Pizza", price: 280, cat: "Pizza & Pasta", img: "https://i.pinimg.com/736x/cd/a7/87/cda787c7743c3ed5aa5307ecb41bc9bd.jpg" },
-        { id: 70, name: "Arrabiata Pasta", price: 200, cat: "Pizza & Pasta", img: "https://i.pinimg.com/1200x/53/49/63/534963fe3b84a200b863c66e92996b47.jpg" },
-        { id: 71, name: "Red Sauce Pasta", price: 200, cat: "Pizza & Pasta", img: "https://i.pinimg.com/webp/1200x/97/da/b7/97dab7c64c03d85164e28a86a3f83ae3.webp" },
-        { id: 72, name: "White Sauce Pasta", price: 220, cat: "Pizza & Pasta", img: "https://i.pinimg.com/1200x/17/6d/11/176d11a66fb0c4943dda87f9a906a29d.jpg" },
-        { id: 73, name: "Macaroni Pasta", price: 180, cat: "Pizza & Pasta", img: "https://i.pinimg.com/1200x/59/08/56/590856487ec70b66c7dc60ccde846457.jpg" },
-        
-        // BURGER & SANDWICH
-        { id: 74, name: "Veg. Burger", price: 60, cat: "Burger & Sandwich", img: "https://i.pinimg.com/1200x/27/ab/5e/27ab5edd0885b823023a2b5ba47a1f04.jpg" },
-        { id: 75, name: "Veg. Cheese Burger", price: 90, cat: "Burger & Sandwich", img: "https://i.pinimg.com/1200x/14/92/6b/14926bca635a8c867e5ce0cc92b5997d.jpg" },
-        { id: 76, name: "Paneer Burger", price: 110, cat: "Burger & Sandwich", img: "https://i.pinimg.com/736x/03/92/31/03923116bef2db0ddc66ab7ec5718fe4.jpg" },
-        { id: 77, name: "Veg. Grill Sandwich", price: 100, cat: "Burger & Sandwich", img: "https://i.pinimg.com/736x/9b/b6/d3/9bb6d3b44e0d6825dad85da4759139d1.jpg" },
-        { id: 78, name: "Cheese Grill Sandwich", price: 130, cat: "Burger & Sandwich", img: "https://i.pinimg.com/736x/f6/15/9c/f6159cc52b6c2c279ffd6d41bcb7f1bf.jpg" },
-        
-        // BEVERAGES
-        { id: 79, name: "Masala Tea", price: 60, cat: "Beverages", img: "https://i.pinimg.com/1200x/7c/a6/54/7ca65499d4a7d6ee290c2edd656a46f2.jpg" },
-        { id: 80, name: "Green Tea", price: 70, cat: "Beverages", img: "https://i.pinimg.com/736x/7b/6c/1f/7b6c1f4ebf405447445b16b27d17868e.jpg" },
-        { id: 81, name: "Black Coffee", price: 80, cat: "Beverages", img: "https://i.pinimg.com/736x/4b/ec/09/4bec09bf9ae097c51c7e5d1d1c740ac3.jpg" },
-        { id: 82, name: "Cold Coffee", price: 120, cat: "Beverages", img: "https://i.pinimg.com/736x/fd/a9/ad/fda9ad56b9d62070fec105cd93693129.jpg" },
-        { id: 83, name: "Mineral Water", price: 30, cat: "Beverages", img: "https://i.pinimg.com/1200x/2f/3c/a7/2f3ca747153d6b31d0e1772d2ee502b5.jpg" },
-        { id: 84, name: "Mango Lassi", price: 90, cat: "Beverages", img: "https://i.pinimg.com/736x/de/fe/c9/defec9faa91d05d095ac33c3c5255180.jpg" },
-        { id: 85, name: "Sweet Lassi", price: 80, cat: "Beverages", img: "https://i.pinimg.com/736x/4e/98/6b/4e986bc30b7f037d12c74e29decd8c48.jpg" },
-        { id: 86, name: "Butter Milk", price: 50, cat: "Beverages", img: "https://i.pinimg.com/736x/4b/07/3a/4b073adfe2df95f4556a5994d37103fc.jpg" },
-        { id: 87, name: "Fresh Lime Soda", price: 70, cat: "Beverages", img: "https://i.pinimg.com/736x/f8/98/74/f8987473c38e50ef49ac0ac0388ee123.jpg" },
-        { id: 88, name: "Virgin Mojito", price: 100, cat: "Beverages", img: "https://i.pinimg.com/736x/91/7e/d7/917ed78a255f4c31a5a0de5ca11815c4.jpg" },
-        { id: 89, name: "Pineapple Juice", price: 90, cat: "Beverages", img: "https://i.pinimg.com/736x/35/39/31/353931ef87cff0959631cecc83ba750e.jpg" },
-        { id: 90, name: "Watermelon Juice", price: 80, cat: "Beverages", img: "https://i.pinimg.com/236x/a9/e6/01/a9e60173bb14abcca9058dd917b106b8.jpg" },
-        { id: 91, name: "Orange Juice", price: 90, cat: "Beverages", img: "https://i.pinimg.com/736x/a8/79/d7/a879d79e378cf371a976f7eab074ff74.jpg" },
-        { id: 92, name: "Papaya Juice", price: 80, cat: "Beverages", img: "https://i.pinimg.com/736x/5a/c2/bd/5ac2bddf2a9f27a82b47677bb9368e7c.jpg" },
-        { id: 93, name: "Mixed Fruit Juice", price: 120, cat: "Beverages", img: "https://i.pinimg.com/736x/07/64/a6/0764a653192a11d809a6f7849bf28e84.jpg" },
-        
-        // SWEETS
+        // ===== THALI (8 items) =====
+        { id: 1, name: "Roasted papad", price: 30, cat: "Thali", img: "https://i.pinimg.com/1200x/60/7e/a5/607ea59d907a627a8031001a5b9610ed.jpg" },
+        { id: 2, name: "Roasted Masala Papad ", price: 50, cat: "Thali", img: "https://i.pinimg.com/736x/39/74/26/397426a54626cf8a720342200ffa0192.jpg" },
+        { id: 3, name: "Fry Masala Papad", price: 170, cat: "Thali", img: "https://i.pinimg.com/1200x/c9/39/fc/c939fcd4a6a2bfb84c7eb2db0e20a14e.jpg" },
+        { id: 122, name: "Papad Roll", price: 140, cat: "Thali", img: "https://i.pinimg.com/736x/d1/d0/77/d1d077e5ee464ba71a6d46a67192ce30.jpg" },
+        { id: 123, name: "Aloo Chat", price: 450, cat: "Thali", img: "https://i.pinimg.com/736x/47/99/7c/47997c0b596ea45d269bb8e8652a2c77.jpg" },
+        { id: 124, name: "Pav Bhaji", price: 120, cat: "Thali", img: "https://i.pinimg.com/736x/80/f5/4a/80f54a80a9eb0d656afe652c3b67f92c.jpg" },
+        { id: 125, name: "Chola Bhature", price: 350, cat: "Thali", img: "https://i.pinimg.com/736x/97/b1/6c/97b16c589c90a68341973b5de3cb8961.jpg" },
+        { id: 126, name: "Paneer Chat", price: 320, cat: "Thali", img: "https://i.pinimg.com/1200x/e2/7f/fe/e27ffeb35e7fa8900c7b53e1feda4107.jpg" },
+
+        // ===== CHAT (19 items) =====
+        { id: 4, name: "Tomato Soup", price: 30, cat: "Chat", img: "https://i.pinimg.com/736x/ef/79/75/ef79752f4907fc0152ff318b37e290e6.jpg" },
+        { id: 5, name: "Tomato Dhaniya Soup", price: 100, cat: "Chat", img: "https://i.pinimg.com/736x/46/fb/d4/46fbd41b9fd95c7823d1ad71360a6791.jpg" },
+        { id: 110, name: "Cream of Tomato Soup", price: 120, cat: "Chat", img: "https://i.pinimg.com/736x/b5/f2/33/b5f2331731e263681fd36392bcfc39e6.jpg" },
+        { id: 111, name: "Hot N Sour Soup", price: 140, cat: "Chat", img: "https://i.pinimg.com/1200x/ac/7f/77/ac7f77edf59fc3ea12f8de7c67bcc5dd.jpg" },
+        { id: 112, name: "Veg. Sweet Corn Soup", price: 130, cat: "Chat", img: "https://i.pinimg.com/736x/21/01/39/210139f902ca1635213a855c2bbed927.jpg" },
+        { id: 113, name: "Veg. Manchow Soup", price: 140, cat: "Chat", img: "https://i.pinimg.com/736x/e0/07/c8/e007c808fecf50f99facdf319fe6f75c.jpg" },
+        { id: 114, name: "Miniestony Soup", price: 150, cat: "Chat", img: "https://i.pinimg.com/736x/c8/c0/e1/c8c0e1ef074ef075de8ddbc7fc6dad0c.jpg" },
+        { id: 115, name: "Lemon Coriender Soup", price: 70, cat: "Chat", img: "https://i.pinimg.com/1200x/ce/f2/a2/cef2a2ea4a2f246584b87bb3a1230830.jpg" },
+        { id: 116, name: "Cream of Mushroom  Soup", price: 100, cat: "Chat", img: "https://i.pinimg.com/control1/736x/fc/3d/d8/fc3dd8e101ee74115f0377a58e88ff6b.jpg" },
+        { id: 117, name: "Veg. Burger", price: 110, cat: "Chat", img: "https://i.pinimg.com/1200x/a0/8e/82/a08e8257e207b2ef3966a27bf88bf5c1.jpg" },
+        { id: 118, name: "Veg. Cheese Burger", price: 120, cat: "Chat", img: "https://i.pinimg.com/736x/75/bb/bb/75bbbb36ed0002e96dcca2475ec48664.jpg" },
+        { id: 119, name: "Paneer Burger", price: 90, cat: "Chat", img: "https://i.pinimg.com/736x/05/a8/8d/05a88dce73e5ed1345171b4f8c74bbfb.jpg" },
+        { id: 127, name: "Masala Tea", price: 60, cat: "Chat", img: "https://i.pinimg.com/736x/22/33/bf/2233bf899709fc983fa0f2dc1cd3bc35.jpg" },
+        { id: 128, name: "Lemon Tea", price: 50, cat: "Chat", img: "https://i.pinimg.com/736x/dc/ee/79/dcee7958f73aba7c163e6f3067fc237a.jpg" },
+        { id: 129, name: "Mineral Water", price: 110, cat: "Chat", img: "https://i.pinimg.com/736x/87/9d/23/879d2335e89ca81de4a04f488e04f179.jpg" },
+        { id: 130, name: "Cold Drinks", price: 130, cat: "Chat", img: "https://i.pinimg.com/736x/76/9f/8b/769f8baa785689025317a8bd00830eef.jpg" },
+        { id: 131, name: "Vanilla (1Scoop)", price: 120, cat: "Chat", img: "https://i.pinimg.com/736x/73/b9/79/73b9799d012a315270a07441bcca5cd8.jpg" },
+        { id: 132, name: "Vanilla (2Scoop)", price: 100, cat: "Chat", img: "https://i.pinimg.com/control1/1200x/c1/23/a5/c123a5921b477747eee29b74326ed31a.jpg" },
+        { id: 133, name:  "Masala Chachh", price: 90, cat: "Chat", img: "https://i.pinimg.com/1200x/ef/d2/d6/efd2d6b3ef057c827c8479ab36f5dcdc.jpg" },
+
+        // ===== SOUP (8 items) =====
+        { id: 6, name: "Fresh Lemon Soda", price: 100, cat: "Soup", img: "https://i.pinimg.com/control1/736x/93/ee/20/93ee20287f13f86937f425ac053b7a21.jpghttps://i.pinimg.com/control1/736x/4f/f3/16/4ff31669ba51e727557fb0211841d6cf.jpg" },
+        { id: 7, name: "Straw Berry (1Scoop)", price: 110, cat: "Soup", img: "https://i.pinimg.com/736x/84/d1/39/84d139b74b0bb8e375fdf54c26d82744.jpg" },
+        { id: 134, name: "Straw Berry (2Scoop)", price: 120, cat: "Soup", img: "https://i.pinimg.com/736x/1e/8c/55/1e8c55045a0d039b9d2f8091b74e1453.jpg" },
+        { id: 135, name: "Butter Secothe (1Scoop)", price: 130, cat: "Soup", img: "https://i.pinimg.com/1200x/61/04/b3/6104b31023872e3f2d0fd5e2afa520bb.jpg" },
+        { id: 136, name: "Butter Secothe (2Scoop)", price: 130, cat: "Soup", img: "https://i.pinimg.com/236x/1c/55/9e/1c559e38614ab47a4df467374ea78405.jpg" },
+        { id: 137, name: "Hot Coffee", price: 140, cat: "Soup", img: "https://i.pinimg.com/736x/4d/e4/0c/4de40c8bbd7ca5c9a76587faf386d444.jpg" },
+        { id: 138, name: "Lassi Sweet/ Namkin", price: 120, cat: "Soup", img: "https://i.pinimg.com/736x/b4/1c/38/b41c386cb159c0584d0c84c65bc2f003.jpg" },
+        { id: 139, name: "Cold Coffee Plain", price: 120, cat: "Soup", img: "https://i.pinimg.com/1200x/b9/f6/ab/b9f6ab37c729ff22e8384d4875d98de8.jpg" },
+
+        // ===== STARTERS (20 items) =====
+        { id: 8, name: "Vanilla Shake", price: 110, cat: "Starters", img: "https://i.pinimg.com/control1/1200x/fe/7d/55/fe7d55e005af26588e58ee4b21b4806f.jpg" },
+        { id: 120, name: "Straw Berry Shake", price: 220, cat: "Starters", img: "https://i.pinimg.com/736x/92/52/7c/92527ca47b7fe037f9910013f05303b1.jpg" },
+        { id: 121, name: "Butter Secotche Shake", price: 170, cat: "Starters", img: "https://i.pinimg.com/1200x/78/c9/2f/78c92f24b00837ca43dda82157acf7b1.jpg" },
+        { id: 140, name: "Cold Coffee With Ice Cream", price: 190, cat: "Starters", img: "https://i.pinimg.com/736x/1f/92/5e/1f925e6b3751d194cc96e00af710f0bc.jpg" },
+        { id: 141, name: "Mirinada Shake", price: 160, cat: "Starters", img: "https://i.pinimg.com/736x/9c/40/8c/9c408c5bd7c3c5ca7e1143b9b727923f.jpg" },
+        { id: 142, name: "Milk Shake With Ice Cream  ", price: 170, cat: "Starters", img: "https://i.pinimg.com/736x/1f/07/b8/1f07b840d057a18d9566cfc748f8964b.jpg" },
+        { id: 143, name: "Garlic Bread (6 Pices)", price: 210, cat: "Starters", img: "https://i.pinimg.com/1200x/5b/1e/48/5b1e4826e7f108359f4403173c8ce7b3.jpg" },
+        { id: 144, name: "Margherita Pizza", price: 220, cat: "Starters", img: "https://i.pinimg.com/736x/0f/2d/6b/0f2d6b352a972b319d82d5557b88fdc0.jpg" },
+        { id: 145, name: "Cheese Onion Capsicum Pizza", price: 140, cat: "Starters", img: "https://i.pinimg.com/1200x/0d/cf/1b/0dcf1b12b4e76bfb383aff1683f1cdf6.jpg" },
+        { id: 146, name: "O.T.C. Pizza", price: 180, cat: "Starters", img: "https://i.pinimg.com/736x/da/2f/1c/da2f1c347c95e37ed62699f004169b85.jpg" },
+        { id: 147, name: "Mushroom Baby Corn Pizza", price: 190, cat: "Starters", img: "https://i.pinimg.com/736x/82/7f/a7/827fa745e585515d74b1d9e6cbf064ca.jpg" },
+        { id: 148, name: "Garden Pizza", price: 120, cat: "Starters", img: "https://i.pinimg.com/736x/0b/e0/58/0be05886c7391dbcd9d741323008e0c5.jpg" },
+        { id: 149, name: "Paneer Tikka Pizza", price: 230, cat: "Starters", img: "https://i.pinimg.com/1200x/55/6e/f7/556ef7473594d261c3f16b14fa977ced.jpg" },
+        { id: 150, name: "Panihari Special Pizza", price: 100, cat: "Starters", img: "https://i.pinimg.com/1200x/cb/e2/82/cbe282b9c8161f706505ad2565fe5568.jpg" },
+        { id: 151, name: "Arrabiata Pasta (Red Pasta)", price: 200, cat: "Starters", img: "https://i.pinimg.com/1200x/be/94/30/be94306521eb4332b14a91c28333e315.jpg" },
+        { id: 152, name: "Arrabiata Pasta (White Pasta)", price: 140, cat: "Starters", img: "https://i.pinimg.com/736x/e8/68/c8/e868c8f4d0928bcb470fcf4e69c212cc.jpg" },
+        { id: 153, name: "Mushroom Arrabiata Pasta", price: 170, cat: "Starters", img: "https://i.pinimg.com/736x/96/4d/fb/964dfbd9d27f85e7b1fc155bccd04bac.jpg" },
+        { id: 154, name: "Alfredo Cream Mushroom", price: 190, cat: "Starters", img: "https://i.pinimg.com/736x/9e/4e/7e/9e4e7e0d7ba798fe0602efa54eb77a33.jpg" },
+        { id: 155, name: "Veg. Pasta", price: 220, cat: "Starters", img: "https://i.pinimg.com/1200x/0c/4f/3d/0c4f3d8095e4de25edf2af9a6ae8aaf2.jpg" },
+        { id: 156, name: "Veg. Grill Sandwiche", price: 200, cat: "Starters", img: "https://i.pinimg.com/736x/53/76/36/53763645776ab8e2c325bb29ad5f5a12.jpg" },
+
+        // ===== PANEER (13 items) =====
+        { id: 9, name: "Cheese Grill Sandwiche", price: 250, cat: "Paneer", img: "https://i.pinimg.com/736x/f6/15/9c/f6159cc52b6c2c279ffd6d41bcb7f1bf.jpg" },
+        { id: 10, name: "Aloo Masala Sandwiche", price: 250, cat: "Paneer", img: "https://i.pinimg.com/736x/8f/9f/0b/8f9f0bbeab2a01c67f85ee2b71853354.jpg" },
+        { id: 11, name: "Veg. Cheese Grill Sandwiche", price: 250, cat: "Paneer", img: "https://i.pinimg.com/736x/da/8f/36/da8f36c0f5a6e305cd14f2aa856a6ebe.jpg" },
+        { id: 12, name: "Stuffed Grill Sandwiche ", price: 260, cat: "Paneer", img: "https://i.pinimg.com/736x/0e/76/0b/0e760b63f4e17f7a73c4fc91a6afde03.jpg" },
+        { id: 13, name: "Mushroom grill Sandwiche", price: 250, cat: "Paneer", img: "https://i.pinimg.com/736x/a6/c8/b5/a6c8b5c4e0f2194561365cfcc94329c2.jpg" },
+        { id: 14, name: "Paneer grill Sandwiche", price: 260, cat: "Paneer", img: "https://i.pinimg.com/736x/ce/f5/36/cef53665b081f22c613c9ff665eb7c7c.jpg" },
+        { id: 15, name: "Panihari Special Grill", price: 250, cat: "Paneer", img: "https://i.pinimg.com/736x/1e/24/b1/1e24b193366d5bf94458cb422e520f36.jpg" },
+        { id: 16, name: "Sandwiche", price: 260, cat: "Paneer", img: "https://i.pinimg.com/control1/1200x/6c/31/8f/6c318f90a07a07bb50c8757ebe584b14.jpg" },
+        { id: 157, name: "French Fries", price: 270, cat: "Paneer", img: "https://i.pinimg.com/736x/d4/5f/9a/d45f9ad6a58ca3a3a225ea5901f72aca.jpg" },
+        { id: 158, name: "Veg. Chowmein", price: 200, cat: "Paneer", img: "https://i.pinimg.com/736x/37/77/a3/3777a38c1565dffd66800f39681007f7.jpg" },
+        { id: 159, name: "Hot Gralic Noodles", price: 260, cat: "Paneer", img: "https://i.pinimg.com/736x/ac/e1/30/ace1309df3647bd066b9890809d4bc4d.jpg" },
+        { id: 160, name: "Veg. Hakka Noodles", price: 230, cat: "Paneer", img: "https://i.pinimg.com/736x/8f/1d/ba/8f1dba7a774591e767c12d6d04e89b81.jpg" },
+        { id: 161, name: "Spring Roll", price: 260, cat: "Paneer", img: "https://i.pinimg.com/control1/1200x/f5/14/e8/f514e8240e04da9eae580e93796aa0f2.jpg" },
+
+        // ===== VEGETABLE (18 items) =====
+        { id: 17, name: "Mushroom Chowmein", price: 150, cat: "Vegetable", img: "https://i.pinimg.com/736x/87/f7/c2/87f7c2399479b340fef5e74bec4ea67d.jpg" },
+        { id: 18, name: "Paneer Chowmein", price: 200, cat: "Vegetable", img: "https://i.pinimg.com/736x/2b/1a/b5/2b1ab5d4eefb2e61c250e34f9d5dad75.jpg" },
+        { id: 19, name: "Veg. Frired Rice", price: 180, cat: "Vegetable", img: "https://i.pinimg.com/736x/b6/ec/56/b6ec566ef4e60b9f748bc00acebfc7fb.jpg" },
+        { id: 20, name: "Paneer Fried Rice", price: 180, cat: "Vegetable", img: "https://i.pinimg.com/736x/42/97/85/429785fcdabb425746ec623340e3cd07.jpg" },
+        { id: 21, name: "Mushroom Fried Rice", price: 170, cat: "Vegetable", img: "https://i.pinimg.com/736x/93/07/09/9307091a332fe5951dbb382f879ce748.jpg" },
+        { id: 22, name: "Chilly Garlic Potato Dry", price: 150, cat: "Vegetable", img: "https://i.pinimg.com/736x/7e/76/73/7e7673aff1ce44e4ca56a55a192a2a70.jpg" },
+        { id: 23, name: "Honey Chilly Potato Dry", price: 220, cat: "Vegetable", img: "https://i.pinimg.com/1200x/1c/6c/4c/1c6c4cba1bb5a853d35a36e9db9d7765.jpg" },
+        { id: 24, name: "Chinese Fried Rice", price: 170, cat: "Vegetable", img: "https://i.pinimg.com/736x/b6/ec/56/b6ec566ef4e60b9f748bc00acebfc7fb.jpg" },
+        { id: 25, name: "Veg. American Chopsuey", price: 170, cat: "Vegetable", img: "https://i.pinimg.com/736x/33/8b/0d/338b0d912f4502f0f436b4c8beb37f5b.jpg" },
+        { id: 26, name: "Veg. Manchurian Dry/Gravy", price: 200, cat: "Vegetable", img: "https://i.pinimg.com/736x/24/1f/6c/241f6ceee40469e0b7079ad7341bb70b.jpg" },
+        { id: 27, name: "Paneer Manchurian Dry/Gravy", price: 200, cat: "Vegetable", img: "https://i.pinimg.com/736x/38/88/90/388890166a4f7a4c22cd2996ba52dd09.jpg" },
+        { id: 162, name: "Chilly Paneer Dry/ Gravy", price: 230, cat: "Vegetable", img: "https://i.pinimg.com/736x/60/7e/51/607e51f22c9c4f996b1d2476aa5bf910.jpg" },
+        { id: 163, name: "Chilly Baby Corn Fry", price: 150, cat: "Vegetable", img: "https://i.pinimg.com/736x/06/fb/8a/06fb8a9a8afd28173ccb63f2cc119165.jpg" },
+        { id: 164, name: "Chilly Mushroom Dry", price: 170, cat: "Vegetable", img: "https://i.pinimg.com/736x/a2/0f/ba/a20fba879cf0ade6acc19502f439a544.jpg" },
+        { id: 165, name: "Paneer Satay Sauce", price: 130, cat: "Vegetable", img: "https://i.pinimg.com/1200x/d4/d6/5b/d4d65b2916c37521ff15f66acb3b1ee9.jpg" },
+        { id: 166, name: "Panihari Special Sizzler", price: 140, cat: "Vegetable", img: "https://i.pinimg.com/736x/75/6f/1c/756f1c3db2174b3f3b558b0ff3be4387.jpg" },
+        { id: 167, name: "Veg. Momo", price: 150, cat: "Vegetable", img: "https://i.pinimg.com/736x/fe/c3/b3/fec3b34d5edb094554ed761c0d6f9d17.jpg" },
+        { id: 168, name: "Fry Momo", price: 210, cat: "Vegetable", img: "https://i.pinimg.com/736x/1f/e1/38/1fe1382f3c64f307758054cbe4fe59f1.jpg" },
+
+        // ===== INDIAN FOOD (13 items) =====
+        { id: 28, name: "Veg. Chilly Momo", price: 250, cat: "Indian Food", img: "https://i.pinimg.com/736x/c1/55/24/c15524441e8b97b1d6cebf19440a3477.jpg" },
+        { id: 29, name: "Veg. Pakora", price: 200, cat: "Indian Food", img: "https://i.pinimg.com/1200x/19/ad/60/19ad60f0382f1ad7a014c32eed3b7604.jpg" },
+        { id: 30, name: "Paneer Pakora", price: 150, cat: "Indian Food", img: "https://i.pinimg.com/736x/29/34/af/2934afc3c8a68302bd04917a7f16525d.jpg" },
+        { id: 31, name: "Hara Bhara Kabab", price: 200, cat: "Indian Food", img: "https://i.pinimg.com/736x/bc/f6/82/bcf682353ac7756a6814e9a1eaf7f5b6.jpg" },
+        { id: 32, name: "Kasturi Kabab", price: 220, cat: "Indian Food", img: "https://i.pinimg.com/736x/39/dd/06/39dd0609ca055469cc636347b78f63d4.jpg" },
+        { id: 169, name: "Dahi Kabab", price: 170, cat: "Indian Food", img: "https://i.pinimg.com/1200x/0d/ee/4e/0dee4e11dbf6f24a56962d36d82f17f7.jpg" },
+        { id: 170, name: "Veg. Seekh Kabab", price: 150, cat: "Indian Food", img: "https://i.pinimg.com/1200x/cb/49/0a/cb490a414dbc89ceec2f05b201f5226a.jpg" },
+        { id: 171, name: "Makki Methi Seekh Kabab", price: 140, cat: "Indian Food", img: "https://i.pinimg.com/736x/87/aa/ab/87aaabf9a6dd024186535c712392f30e.jpg" },
+        { id: 172, name: "Paneer Tikka", price: 220, cat: "Indian Food", img: "https://i.pinimg.com/736x/e7/39/e3/e739e3705b842e5e14a9548b21d998b7.jpg" },
+        { id: 173, name: "Paneer Peshawari Tikka", price: 160, cat: "Indian Food", img: "https://i.pinimg.com/736x/98/2b/3d/982b3df521f429902ee446e9fa6af456.jpg" },
+        { id: 174, name: "Maushroom Tikka", price: 150, cat: "Indian Food", img: "https://i.pinimg.com/736x/fb/7a/3b/fb7a3bb6da41e235b1e87e7d9984a981.jpg" },
+        { id: 175, name: "Paneer Hariyali Tikka", price: 140, cat: "Indian Food", img: "https://i.pinimg.com/736x/1e/1d/27/1e1d2783ee247573eaa2d78664f0de94.jpg" },
+        { id: 176, name: "Panihari Special", price: 160, cat: "Indian Food", img: "https://i.pinimg.com/736x/9a/d8/84/9ad884618c3f8c12e68aab30cdfb5a6e.jpg" },
+
+        // ===== TANDOOR (13 items) =====
+        { id: 33, name: "Tandoori Platter", price: 20, cat: "Tandoor", img: "https://i.pinimg.com/736x/cf/38/2e/cf382ef1b71efdadb829b643348cc52d.jpg" },
+        { id: 34, name: "Dal Fry", price: 25, cat: "Tandoor", img: "https://i.pinimg.com/736x/94/88/2d/94882de55baa28f9c5c881d11c3526f0.jpg" },
+        { id: 35, name: "Dal Tadka", price: 25, cat: "Tandoor", img: "https://i.pinimg.com/736x/1c/9e/e1/1c9ee18e38a1f22dc0c0d0a2ffefa811.jpg" },
+        { id: 36, name: "Dhaba Dal", price: 50, cat: "Tandoor", img: "https://i.pinimg.com/736x/85/a7/aa/85a7aa3275da22de5064f91e15ef6e73.jpg" },
+        { id: 37, name: "Dal Makhani", price: 60, cat: "Tandoor", img: "https://i.pinimg.com/control1/1200x/ef/6e/1b/ef6e1b22f8de024fc8611bc407b6e761.jpg" },
+        { id: 38, name: "Maa ki Dal Makhan Thok ke", price: 80, cat: "Tandoor", img: "https://i.pinimg.com/control1/1200x/b4/fb/9e/b4fb9eda507ef40b66c300388b9d9f3e.jpg" },
+        { id: 39, name: "Jeera Aloo", price: 50, cat: "Tandoor", img: "https://i.pinimg.com/736x/df/e5/79/dfe579ad0720309523348f523e2bba90.jpg" },
+        { id: 40, name: "Bhindi Masala", price: 30, cat: "Tandoor", img: "https://i.pinimg.com/736x/c5/d4/f2/c5d4f201cf4a8da9499ce8ad14aa5f2d.jpg" },
+        { id: 177, name: "Chana Masala", price: 90, cat: "Tandoor", img: "https://i.pinimg.com/736x/73/c7/c0/73c7c0daf2ac9c28b7391e66232c2170.jpg" },
+        { id: 178, name: "Jaipuri Aloo Pyaz", price: 40, cat: "Tandoor", img: "https://i.pinimg.com/1200x/14/6b/ad/146badd040ccc74810d5842937408b24.jpg" },
+        { id: 179, name: "Veg. Jalfrezi", price: 70, cat: "Tandoor", img: "https://i.pinimg.com/1200x/c4/3c/99/c43c99d1eb5b86f015f62f2f23e03c5a.jpg" },
+        { id: 180, name: "Mushroom Masala", price: 45, cat: "Tandoor", img: "https://i.pinimg.com/736x/b9/96/86/b9968667d8dfff98b7315d209bbdfea6.jpg" },
+        { id: 181, name: "Mutter Mushroom Masala", price: 30, cat: "Tandoor", img: "https://i.pinimg.com/736x/83/ff/06/83ff06c71b0f78f0e55d6a8e17be47e8.jpg" },
+
+        // ===== RICE (10 items) =====
+        { id: 41, name: "Tawa Veg.", price: 120, cat: "Rice", img: "https://i.pinimg.com/736x/4d/49/da/4d49da404af5cda1ca394c1107fee357.jpg" },
+        { id: 42, name: "Tandoori Gobi Masala", price: 150, cat: "Rice", img: "https://i.pinimg.com/1200x/5d/88/fd/5d88fdf739983f3ae707dc9dc42b9a25.jpg" },
+        { id: 43, name: "Sarson Da Saag", price: 200, cat: "Rice", img: "https://i.pinimg.com/736x/59/19/38/591938b139be738cca2a231dd2bfae8b.jpg" },
+        { id: 44, name: "Dum Aloo", price: 250, cat: "Rice", img: "https://i.pinimg.com/736x/db/2d/74/db2d740f1bf3822a91a73dcb477364de.jpg" },
+        { id: 182, name: "Kashmiri Dum Aloo", price: 260, cat: "Rice", img: "https://i.pinimg.com/736x/01/6a/2c/016a2c1663e971a3baeb1c0636e2460f.jpg" },
+        { id: 183, name: "Sev Tomato", price: 240, cat: "Rice", img: "https://i.pinimg.com/1200x/7a/80/8b/7a808ba00d4f297c78343a505d339b87.jpg" },
+        { id: 184, name: "Rajasthani Gatta Masala", price: 160, cat: "Rice", img: "https://i.pinimg.com/736x/2b/e8/e6/2be8e6492b4e7be3dae98479eb8377fa.jpg" },
+        { id: 185, name: "Rajma Masala", price: 170, cat: "Rice", img: "https://i.pinimg.com/1200x/91/c9/bf/91c9bfb5dcccc481b8918eb0d72e4e8a.jpg" },
+        { id: 186, name: "Mix Veg.", price: 140, cat: "Rice", img: "https://i.pinimg.com/1200x/84/e7/15/84e715c0f7d072161f19de5e2017bf16.jpg" },
+        { id: 187, name: "Paneer Butter Masala", price: 140, cat: "Rice", img: "https://i.pinimg.com/control1/1200x/75/25/c2/7525c28b815e93b8f4ad4a3bb889090e.jpg" },
+
+        // ===== RAITA & SALAD (10 items) =====
+        { id: 45, name: "Kadai Paneer", price: 50, cat: "Raita & Salad", img: "https://i.pinimg.com/736x/4a/2b/7b/4a2b7b90a668437dc0ae433e867d8e25.jpg" },
+        { id: 46, name: "Mutter Paneer", price: 70, cat: "Raita & Salad", img: "https://i.pinimg.com/736x/1f/9e/c5/1f9ec59090ba394cb48fd239d9ce5bb6.jpg" },
+        { id: 47, name: "Palak Paneer", price: 80, cat: "Raita & Salad", img: "https://i.pinimg.com/736x/1d/a6/a2/1da6a2da06ee211c68bb133238657176.jpg" },
+        { id: 48, name: "Khoya Paneer", price: 80, cat: "Raita & Salad", img: "https://i.pinimg.com/736x/65/12/da/6512da0d5879b344b4bb4aa3d9fbe6fd.jpg" },
+        { id: 188, name: "Paneer Bhujji", price: 80, cat: "Raita & Salad", img: "https://i.pinimg.com/1200x/58/77/a1/5877a1eddd2c8e5149b429304f17c9bd.jpg" },
+        { id: 189, name: "Paneer Pasanda", price: 50, cat: "Raita & Salad", img: "https://i.pinimg.com/1200x/26/ec/68/26ec680ca0817a69395b7a3f361c4b83.jpg" },
+        { id: 190, name: "Handi Paneer", price: 90, cat: "Raita & Salad", img: "https://i.pinimg.com/1200x/90/1d/a4/901da40c6d7663a0cd322215b75ee6be.jpg" },
+        { id: 191, name: "Paneer Tikka Butter Masala", price: 100, cat: "Raita & Salad", img: "https://i.pinimg.com/736x/59/81/85/5981859da80c1d8580654daf371d0ffe.jpg" },
+        { id: 192, name: "Paneer Lababdar", price: 120, cat: "Raita & Salad", img: "https://i.pinimg.com/736x/73/a7/9c/73a79c998e68a382fbe241186a609396.jpg" },
+        { id: 193, name: "Paneer Takatak", price: 130, cat: "Raita & Salad", img: "https://i.pinimg.com/736x/29/4f/7d/294f7d9f7f7d6a382f62f369c201cb1e.jpg" },
+
+        // ===== SOUTH INDIAN (12 items) =====
+        { id: 49, name: "Paneer Achari", price: 100, cat: "South Indian", img: "https://i.pinimg.com/736x/65/12/da/6512da0d5879b344b4bb4aa3d9fbe6fd.jpg" },
+        { id: 50, name: "Palak Corn", price: 140, cat: "South Indian", img: "https://i.pinimg.com/1200x/dd/1d/09/dd1d09db5f07a98870f62bd289711adc.jpg" },
+        { id: 51, name: "Palak Baby Corn", price: 160, cat: "South Indian", img: "https://i.pinimg.com/736x/23/ee/ee/23eeeeff899a4ddc316a52fbecd8da6d.jpg" },
+        { id: 52, name: "Shahi Paneer (Red Gravy)", price: 150, cat: "South Indian", img: "https://i.pinimg.com/1200x/d6/a7/95/d6a7957341c268116f3d80b36e2d95b7.jpg" },
+        { id: 53, name: "Malai Kofta (Red Gravy)", price: 130, cat: "South Indian", img: "https://i.pinimg.com/736x/af/fa/98/affa9896d8b3a360aac18f6b3b93c456.jpg" },
+        { id: 54, name: "Malai Kofta(White Gravy)", price: 100, cat: "South Indian", img: "https://i.pinimg.com/1200x/53/cc/c9/53ccc9314ff6e553e218a8a27e8054f8.jpg" },
+        { id: 55, name: "Veg. Kofta", price: 110, cat: "South Indian", img: "https://i.pinimg.com/736x/9c/ac/37/9cac37a7ea24b4941f80771a8924438c.jpg" },
+        { id: 194, name: "Shahi Paneer (White Gravy)", price: 150, cat: "South Indian", img: "https://i.pinimg.com/736x/0a/27/45/0a274572566e8d9608c8827df88e9ccf.jpg" },
+        { id: 195, name: "Papad Paneer Masala", price: 170, cat: "South Indian", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTtRR1xxBVYMdp-_K8vWHF7NowiNXHfBdUrW-YnrmcvcMk2cCqs5eYxXoUz&s=10" },
+        { id: 196, name: "Kashmiri Kofta", price: 180, cat: "South Indian", img: "https://i.pinimg.com/736x/31/14/b8/3114b8ed694a46de0767f7ffabc7d1bc.jpg" },
+        { id: 197, name: "Kaju Curry", price: 100, cat: "South Indian", img: "https://i.pinimg.com/736x/6e/22/f6/6e22f63ae7ef6a87e23b0d9e50c739e0.jpg" },
+        { id: 198, name: "Aloo Pyaz Paneer Masala", price: 110, cat: "South Indian", img: "https://i.pinimg.com/736x/de/99/d8/de99d895c8fd9df861b52d3589b2df6c.jpg" },
+
+        // ===== CHINESE (17 items) =====
+        { id: 56, name: "Tawa Paneer Chat Patta", price: 120, cat: "Chinese", img: "https://i.pinimg.com/236x/5a/4c/68/5a4c68462be70256a940a76fe8aa5c75.jpg" },
+        { id: 57, name: "Navratn Korma", price: 150, cat: "Chinese", img: "https://i.pinimg.com/736x/54/ac/bd/54acbdce778a72277cc73a90946a6028.jpg" },
+        { id: 58, name: "Nargisi Kofta", price: 160, cat: "Chinese", img: "https://i.pinimg.com/736x/e7/cc/27/e7cc2767fb18456263534d9680e35a96.jpg" },
+        { id: 59, name: "Paneer Cheses Roll", price: 160, cat: "Chinese", img: "https://i.pinimg.com/1200x/c3/98/cd/c398cddac00553e07942e0a617a38737.jpg" },
+        { id: 60, name: "Panihari Special Sabji", price: 170, cat: "Chinese", img: "https://i.pinimg.com/736x/42/e8/75/42e87586e3e424a9043d341fd3dbc063.jpg" },
+        { id: 61, name: "Plain Curd", price: 170, cat: "Chinese", img: "https://i.pinimg.com/1200x/23/12/a9/2312a9934b013c0cf9f0e93971f26a6a.jpg" },
+        { id: 62, name: "Veg. Raita", price: 180, cat: "Chinese", img: "https://i.pinimg.com/736x/a3/b4/ca/a3b4ca4e17bc90ce5d4cf02832b0d361.jpg" },
+        { id: 63, name: "Boondi Raita", price: 200, cat: "Chinese", img: "https://i.pinimg.com/1200x/fc/32/50/fc32502e84ea989748f785e02af62e8b.jpg" },
+        { id: 64, name: "Aloo Raita", price: 210, cat: "Chinese", img: "https://i.pinimg.com/1200x/44/25/3e/44253e2be702abca3bed1918a973d5b3.jpg" },
+        { id: 65, name: "Khira Raita", price: 150, cat: "Chinese", img: "https://i.pinimg.com/736x/26/17/37/26173739d8a301480f187437aac35b04.jpg" },
+        { id: 199, name: "Fruit Raita", price: 180, cat: "Chinese", img: "https://i.pinimg.com/736x/88/e3/0a/88e30a42aef5bbc95f56388849c3e9cc.jpg" },
+        { id: 200, name: "Pineapple Raita", price: 220, cat: "Chinese", img: "https://i.pinimg.com/1200x/c8/f2/40/c8f24054b16e67747b36dc63d107ce4f.jpg" },
+        { id: 201, name: "Gereen Salad", price: 220, cat: "Chinese", img: "https://i.pinimg.com/control1/736x/8c/24/3c/8c243cc8e49925b96f1cac71cd39de6d.jpg" },
+        { id: 202, name: "Cucumber Salad", price: 180, cat: "Chinese", img: "https://i.pinimg.com/control1/1200x/d7/58/a0/d758a090a2c845c5566c2c174e95e1a8.jpg" },
+        { id: 203, name: "Onion Salad", price: 190, cat: "Chinese", img: "https://i.pinimg.com/control1/1200x/26/de/1a/26de1a999bd8ef6785ed50865f4724ef.jpg" },
+        { id: 204, name: "Khira Tomato Salad", price: 200, cat: "Chinese", img: "https://i.pinimg.com/1200x/5c/90/04/5c90042e723d9654f4bb8b9f8d350b04.jpg" },
+        { id: 205, name: "Kachumber Salad", price: 200, cat: "Chinese", img: "https://i.pinimg.com/736x/64/ee/17/64ee17a0894f100227141c50c8c8a450.jpg" },
+
+        // ===== PIZZA & PASTA (13 items) =====
+        { id: 66, name: "Plain Rice", price: 120, cat: "Pizza & Pasta", img: "https://i.pinimg.com/736x/ae/14/55/ae1455e1c82687a1e280840d22fe6eed.jpg" },
+        { id: 67, name: "Jeera Rice", price: 200, cat: "Pizza & Pasta", img: "https://i.pinimg.com/736x/ee/80/2a/ee802a1e8fa6a41ae5acb363fc4df60b.jpg" },
+        { id: 68, name: "Veg. Pulao", price: 250, cat: "Pizza & Pasta", img: "https://i.pinimg.com/736x/5b/74/ee/5b74ee4db1b4e0783bbef82364952808.jpg" },
+        { id: 69, name: "Veg. Biryani", price: 280, cat: "Pizza & Pasta", img: "https://i.pinimg.com/736x/3d/3f/3d/3d3f3d58f1fc3b9b1c8180e6ebb8bcf5.jpg" },
+        { id: 70, name: "Kashmiri Pulao", price: 200, cat: "Pizza & Pasta", img: "https://i.pinimg.com/1200x/4a/42/cc/4a42ccccc664b329b0296a01aac0c76d.jpg" },
+        { id: 71, name: "Mutter Pulao:", price: 200, cat: "Pizza & Pasta", img: "https://i.pinimg.com/736x/20/5f/ac/205fac72da2391e1b64fed35e4a9811e.jpg" },
+        { id: 72, name: "Veg. Hyderabadi Biryani", price: 220, cat: "Pizza & Pasta", img: "https://i.pinimg.com/736x/d5/23/a3/d523a339d37ea52451bb482013b93f9a.jpg" },
+        { id: 73, name: "Handi Birayani", price: 180, cat: "Pizza & Pasta", img: "https://i.pinimg.com/736x/03/52/28/035228bc3b4c123ce0672b650373bce8.jpg" },
+        { id: 206, name: "Kashmiri Birayani", price: 320, cat: "Pizza & Pasta", img: "https://i.pinimg.com/736x/a4/1e/7f/a41e7f07463d4eb641a6bc31cc8b434d.jpg" },
+        { id: 207, name: "Panihari Special Biryani", price: 290, cat: "Pizza & Pasta", img: "https://i.pinimg.com/736x/6a/9d/f4/6a9df4545a24c404acf8ee7a8cab820b.jpg" },
+        { id: 208, name: "Tawa Roti Plain", price: 150, cat: "Pizza & Pasta", img: "https://i.pinimg.com/736x/cf/38/2e/cf382ef1b71efdadb829b643348cc52d.jpg" },
+        { id: 209, name: "Tawa Roti Butter", price: 230, cat: "Pizza & Pasta", img: "https://i.pinimg.com/736x/8a/ab/86/8aab861a36c2320819794e5a3e86a6c7.jpg" },
+        { id: 210, name: "Tandoori Roti Butter", price: 240, cat: "Pizza & Pasta", img: "https://i.pinimg.com/736x/38/2c/ca/382ccadb06b651b9d2ddbf051a054d3a.jpg" },
+
+        // ===== BURGER & SANDWICH (13 items) =====
+        { id: 74, name: "Tandoori Roti Plain", price: 60, cat: "Burger & Sandwich", img: "https://i.pinimg.com/736x/90/39/70/90397008e81da09de75cb210d5dadea3.jpg" },
+        { id: 75, name: "Missi Roti with Butter", price: 90, cat: "Burger & Sandwich", img: "https://i.pinimg.com/736x/b7/c5/01/b7c5017a06196a42584d6b8d0756d92d.jpg" },
+        { id: 76, name: "Onion Missi Roti", price: 110, cat: "Burger & Sandwich", img: "https://i.pinimg.com/736x/77/34/f9/7734f916fdee3af1d9858f17c4fca5af.jpg" },
+        { id: 77, name: "Plain Naan", price: 100, cat: "Burger & Sandwich", img: "https://i.pinimg.com/736x/cb/28/0b/cb280b9072bc3347c4c9d6fa1d5c7ce9.jpg" },
+        { id: 78, name: "Butter Naan", price: 130, cat: "Burger & Sandwich", img: "https://i.pinimg.com/control1/1200x/f6/7a/5f/f67a5ffe6da2b4933e8cc488268ecb1b.jpg" },
+        { id: 211, name: "Paneer Naan", price: 80, cat: "Burger & Sandwich", img: "https://i.pinimg.com/736x/33/5d/e6/335de6d7ed58d8ff4e4a5f8fa4fa4f69.jpg" },
+        { id: 212, name: "Cheese Naan", price: 120, cat: "Burger & Sandwich", img: "https://i.pinimg.com/736x/60/5e/2f/605e2f25881aa1f07bf7adf3e58cd70c.jpg" },
+        { id: 213, name: "Garlic Cheese Naan", price: 140, cat: "Burger & Sandwich", img: "https://i.pinimg.com/736x/77/55/b7/7755b7f0ec8928557b0597661c847366.jpg" },
+        { id: 214, name: "Garlic Naan:", price: 160, cat: "Burger & Sandwich", img: "https://i.pinimg.com/1200x/9b/0e/c6/9b0ec6976539179841835443e12df278.jpg" },
+        { id: 215, name: "Kashmiri Naan", price: 110, cat: "Burger & Sandwich", img: "https://i.pinimg.com/736x/88/f1/9f/88f19fcd22287877f4ef58d9ff294cc2.jpg" },
+        { id: 216, name: "Stuffed Naan", price: 130, cat: "Burger & Sandwich", img: "https://i.pinimg.com/1200x/2b/69/77/2b6977a55d17677eb69ca8a09d1a7d21.jpg" },
+        { id: 217, name: "Aloo Paratha", price: 150, cat: "Burger & Sandwich", img: "https://i.pinimg.com/736x/ae/c6/a8/aec6a883dae34c7f27eab93ef0b09773.jpg" },
+        { id: 218, name: "Aloo Onion Paratha", price: 120, cat: "Burger & Sandwich", img: "https://i.pinimg.com/736x/c5/e9/33/c5e93336b90be0ad759095c8df55df82.jpg" },
+
+        // ===== BEVERAGES (22 items) =====
+        { id: 79, name: "Gobi Paratha", price: 60, cat: "Beverages", img: "https://i.pinimg.com/736x/e3/3a/ca/e33acacdd44c6417f994afcfde503763.jpg" },
+        { id: 80, name: "Bajre ki Roti", price: 70, cat: "Beverages", img: "https://i.pinimg.com/736x/ac/81/e5/ac81e560a2cd12ab456d250c6f9a3ebc.jpg" },
+        { id: 81, name: "Lachha Paratha", price: 80, cat: "Beverages", img: "https://i.pinimg.com/1200x/00/65/28/00652871b67a7a6a407a66671358d470.jpg" },
+        { id: 82, name: "Lachha Pudina Paratha", price: 120, cat: "Beverages", img: "https://i.pinimg.com/736x/05/14/2e/05142e4c7d31b412e6c6308e2e1aba1c.jpg" },
+        { id: 83, name: "Stuffed Kulcha", price: 30, cat: "Beverages", img: "https://i.pinimg.com/736x/a5/9d/28/a59d28f5155314e92aa7380765811fab.jpg" },
+        { id: 84, name: "Onion Kulcha", price: 90, cat: "Beverages", img: "https://i.pinimg.com/736x/19/0d/6c/190d6cd291fadf15ccb1cabedfc20f36.jpg" },
+        { id: 85, name: "Paneer Paratha", price: 80, cat: "Beverages", img: "https://i.pinimg.com/736x/e7/26/4c/e7264c9d35918631d403d472890760e0.jpg" },
+
+        { id: 86, name: "Plain Dosa", price: 50, cat: "Beverages", img: "https://i.pinimg.com/736x/da/26/07/da2607596434e098807784328419a85d.jpg" },
+        { id: 87, name: "Masala Dosa:", price: 70, cat: "Beverages", img: "https://i.pinimg.com/736x/c1/06/a3/c106a35e7e36a98bab7b0c5cdd9b337b.jpg" },
+        { id: 88, name: "Rawa Masala Dosa", price: 100, cat: "Beverages", img: "https://i.pinimg.com/1200x/08/c6/4e/08c64e5faca2536fffa0b4df3bc06fd4.jpg" },
+        { id: 89, name: "Rawa Plain Dousa", price: 90, cat: "Beverages", img: "https://i.pinimg.com/736x/01/d4/42/01d44286b423915dc4f3936032a59906.jpg" },
+        { id: 90, name: "Rawa Onion Dosa", price: 80, cat: "Beverages", img: "https://i.pinimg.com/736x/36/f0/35/36f0358518606453f19208d45c738dcb.jpg" },
+        { id: 91, name: "Paper Plain Dosa", price: 90, cat: "Beverages", img: "https://i.pinimg.com/736x/08/d4/22/08d422e25989ccf47f135ec26049082d.jpg" },
+        { id: 92, name: "Paper Masala Dosa", price: 80, cat: "Beverages", img: "https://i.pinimg.com/1200x/cf/12/53/cf1253c2727834cf806244d8ff60535e.jpg" },
+        { id: 93, name: "Paper Paneer Masala Dosa", price: 120, cat: "Beverages", img: "https://i.pinimg.com/1200x/5f/34/63/5f34634dcaa9278760ddb2ef5c473211.jpg" },
+        { id: 219, name: "Veg. Uttapam", price: 140, cat: "Beverages", img: "https://i.pinimg.com/736x/cb/8c/83/cb8c83c9fb03243b639c46232392ca0a.jpg" },
+        { id: 220, name: "Onion Uttapam", price: 140, cat: "Beverages", img: "https://i.pinimg.com/736x/08/5f/14/085f14555cc84e0515b3b21a21ba346c.jpg" },
+        { id: 221, name: "Tomato Uttapam", price: 120, cat: "Beverages", img: "https://i.pinimg.com/1200x/6f/af/76/6faf765a163131890b4213b3d4ca68c9.jpg" },
+        { id: 222, name: "Paneer Uttapam", price: 150, cat: "Beverages", img: "https://i.pinimg.com/1200x/f5/8c/19/f58c19130c4b8a278a6e349e758376c9.jpg" },
+        { id: 223, name: "Idli Sambar", price: 120, cat: "Beverages", img: "https://i.pinimg.com/736x/b8/01/12/b80112721b775da7a665295f11e9298b.jpg" },
+        { id: 224, name: "Fry Idli Sambar", price: 100, cat: "Beverages", img: "https://i.pinimg.com/736x/51/2f/d2/512fd240300193ea2ad1f67c0b973bf7.jpg" },
+        { id: 225, name: "Butter Idli Sambar", price: 70, cat: "Beverages", img: "https://i.pinimg.com/736x/4c/c7/ec/4cc7eca1a22f00d399b1904ebb44217d.jpg" },
+
+        // ===== SWEETS (12 items) =====
         { id: 94, name: "Gulab Jamun", price: 60, cat: "Sweets", img: "https://i.pinimg.com/736x/d7/57/aa/d757aaadf9cb57a72ee0143984c7338b.jpg" },
         { id: 95, name: "Rasgulla", price: 60, cat: "Sweets", img: "https://i.pinimg.com/736x/31/fb/61/31fb61d23d041061c567d304d80b36b2.jpg" },
         { id: 96, name: "Ras Malai", price: 80, cat: "Sweets", img: "https://i.pinimg.com/736x/55/db/1a/55db1a69d47ec709e66ba03accbea0ce.jpg" },
         { id: 97, name: "Moong Dal Halwa", price: 100, cat: "Sweets", img: "https://i.pinimg.com/736x/e6/be/5c/e6be5c23aa522817871f7420cdc8af2c.jpg" },
         { id: 98, name: "Gajar Halwa", price: 100, cat: "Sweets", img: "https://i.pinimg.com/736x/fc/b5/b5/fcb5b5eb47ea6885066579d9e6ce150b.jpg" },
         { id: 99, name: "Jalebi", price: 80, cat: "Sweets", img: "https://i.pinimg.com/736x/7a/a7/dd/7aa7dd20bc7d10c15311229fe1eff2c2.jpg" },
-        
-        // ICE CREAM (HD Images added & items enhanced)
+        { id: 226, name: "Rasmalai (2pc)", price: 90, cat: "Sweets", img: "https://i.pinimg.com/736x/46/8a/f4/468af484a7c01607580fbc823e2e794f.jpg" },
+        { id: 227, name: "Kaju Katli", price: 120, cat: "Sweets", img: "https://i.pinimg.com/736x/03/26/10/032610d7d9602bc9279c782df8f0978e.jpg" },
+        { id: 228, name: "Besan Barfi", price: 80, cat: "Sweets", img: "https://i.pinimg.com/1200x/1e/be/d5/1ebed51366f130444c423078566d828b.jpg" },
+        { id: 229, name: "Kalakand", price: 100, cat: "Sweets", img: "https://i.pinimg.com/1200x/ec/b2/a2/ecb2a2f15f152c8aaf31133999a9429d.jpg" },
+        { id: 230, name: "Mysore Pak", price: 90, cat: "Sweets", img: "https://i.pinimg.com/1200x/27/c3/97/27c397d61810aa332c56953239c962f4.jpg" },
+        { id: 231, name: "Coconut Barfi", price: 80, cat: "Sweets", img: "https://i.pinimg.com/736x/cc/56/21/cc5621bed566de3e97d37e9fe3e1f2db.jpg" },
+
+        // ===== ICE CREAM (13 items) =====
         { id: 100, name: "Chocolate Ice Cream", price: 65, cat: "Ice Cream", img: "https://i.pinimg.com/736x/cb/2c/ac/cb2cacba6d3da5ddce930294370e6c2d.jpg" },
         { id: 101, name: "Butterscotch Ice Cream", price: 65, cat: "Ice Cream", img: "https://i.pinimg.com/736x/1b/08/9a/1b089a88c8706646a29a3be863a8a6dc.jpg" },
         { id: 102, name: "Mango Ice Cream", price: 70, cat: "Ice Cream", img: "https://i.pinimg.com/736x/c0/d7/a8/c0d7a8656023bb6a45d6925c7c7f7017.jpg" },
@@ -376,7 +499,12 @@
         { id: 106, name: "Anjeer Ice Cream", price: 80, cat: "Ice Cream", img: "https://i.pinimg.com/736x/b9/cd/00/b9cd00d4b06c07bc61654bf34f9fedb8.jpg" },
         { id: 107, name: "Cassata Ice Cream", price: 80, cat: "Ice Cream", img: "https://i.pinimg.com/736x/99/4e/df/994edfe80af95430eb1bb379367a90ea.jpg" },
         { id: 108, name: "Vanilla Ice Cream", price: 60, cat: "Ice Cream", img: "https://i.pinimg.com/1200x/44/de/a6/44dea6a981f09227a6a69c3c5f7f4b13.jpg" },
-        { id: 109, name: "Choco Chip Ice Cream", price: 85, cat: "Ice Cream", img: "https://i.pinimg.com/1200x/ae/d8/21/aed82128dca520730a78e6d7631e9693.jpg" }
+        { id: 109, name: "Choco Chip Ice Cream", price: 85, cat: "Ice Cream", img: "https://i.pinimg.com/1200x/ae/d8/21/aed82128dca520730a78e6d7631e9693.jpg" },
+        { id: 232, name: "Tender Coconut Ice Cream", price: 75, cat: "Ice Cream", img: "https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?auto=format&fit=crop&w=900&q=85" },
+        { id: 233, name: "Alphonso Mango Sundae", price: 120, cat: "Ice Cream", img: "https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=900&q=85" },
+        { id: 234, name: "Brownie with Ice Cream", price: 140, cat: "Ice Cream", img: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=900&q=85" }
+        
+        
     ];
 
     let currentCategory = 'all';
@@ -419,10 +547,7 @@
     function filterMenu(cat) {
         currentCategory = cat;
         document.querySelectorAll('.cat-chip').forEach(chip => {
-            chip.classList.remove('active-chip');
-            const chipText = chip.innerText.toLowerCase();
-            if (cat === 'all' && chipText.includes('all')) chip.classList.add('active-chip');
-            else if (chipText.includes(cat.toLowerCase())) chip.classList.add('active-chip');
+            chip.classList.toggle('active-chip', chip.dataset.category === cat);
         }); renderMenu();
     }
 
@@ -432,6 +557,10 @@
     function renderMenu() {
         const grid = document.getElementById('menu-grid');
         const filtered = menuItems.filter(item => { const matchCat = currentCategory === 'all' || item.cat === currentCategory; const matchSearch = item.name.toLowerCase().includes(searchQuery); return matchCat && matchSearch; });
+        if (filtered.length === 0) {
+            grid.innerHTML = '<div class="col-span-full text-center py-16 text-white/30"><i class="fas fa-search text-3xl mb-4"></i><p>No food items found.</p></div>';
+            return;
+        }
         grid.innerHTML = filtered.map(item => {
             const inCart = cart[item.id];
             return `<div class="food-card glass p-3 md:p-5 group" id="food-card-${item.id}">
@@ -465,9 +594,8 @@
         updateCartUI(); renderMenu(); renderCartSheet();
     }
 
-    // Automatic 5% GST Calculation Functions
     function getSubtotal() { return Object.values(cart).reduce((s, i) => s + (i.price * i.qty), 0); }
-    function getGstAmount() { return Math.round(getSubtotal() * 0.05); } // 5% GST auto calculation
+    function getGstAmount() { return Math.round(getSubtotal() * 0.05); }
     function getGrandTotal() { return getSubtotal() + getGstAmount(); }
     function getCartCount() { return Object.values(cart).reduce((s, i) => s + i.qty, 0); }
 
@@ -495,7 +623,7 @@
                 <div class="flex-1 min-w-0"><h4 class="text-sm font-semibold text-white truncate">${item.name}</h4><p class="text-xs text-white/30 mt-0.5">₹${item.price} × ${item.qty}</p><p class="text-gold font-bold text-sm mt-1">₹${sub}</p></div>
                 <div class="flex items-center gap-2 flex-shrink-0"><button class="qty-btn" onclick="changeQty(${item.id}, -1)"><i class="fas fa-minus"></i></button><span class="text-gold font-bold text-sm min-w-[20px] text-center">${item.qty}</span><button class="qty-btn" onclick="changeQty(${item.id}, 1)"><i class="fas fa-plus"></i></button></div></div>`;
         }).join('');
-        const gst = Math.round(total * 0.05); // 5% GST auto calculation
+        const gst = Math.round(total * 0.05);
         document.getElementById('cartSubtotal').textContent = '₹' + total;
         document.getElementById('cartGst').textContent = '₹' + gst;
         document.getElementById('cartTotal').textContent = '₹' + (total + gst);
@@ -508,31 +636,53 @@
         const gst = getGstAmount();
         const grandTotal = getGrandTotal();
         const orderData = {
-            table: currentTable, items: items.map(i => ({ name: i.name, qty: i.qty, price: i.price, subtotal: i.price * i.qty })),
-            subtotal: subtotal, gst: gst, total: grandTotal, status: "pending", timestamp: Date.now(),
-            time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
-            date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
+            table: currentTable,
+            items: items.map(i => ({ name: i.name, qty: i.qty, price: i.price, sub: i.price * i.qty })),
+            subtotal: subtotal,
+            gst: gst,
+            total: grandTotal,
+            status: 'new',
+            time: new Date().toISOString()
         };
         db.ref('orders').push(orderData).then(() => {
-            closeCart(); showSuccessScreen(currentTable, grandTotal); cart = {}; updateCartUI(); renderMenu();
-            btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>PLACE ORDER';
-        }).catch((err) => { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>PLACE ORDER'; showToast('Order fail! Internet check karo.'); console.error(err); });
+            closeCart();
+            document.getElementById('successTable').textContent = 'Table ' + currentTable;
+            document.getElementById('successAmount').textContent = '₹' + grandTotal;
+            document.getElementById('success-overlay').classList.add('open');
+            document.body.style.overflow = 'hidden';
+            cart = {}; updateCartUI(); renderMenu();
+            btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> PLACE ORDER';
+        }).catch(err => {
+            alert('Order failed! Check internet.'); btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> PLACE ORDER';
+        });
     }
 
-    function showSuccessScreen(table, total) {
-        document.getElementById('successTable').textContent = 'Table ' + table; document.getElementById('successAmount').textContent = 'Total: ₹' + total;
-        document.getElementById('success-overlay').classList.add('open'); document.body.style.overflow = 'hidden';
+    function closeSuccess() {
+        document.getElementById('success-overlay').classList.remove('open');
+        document.body.style.overflow = 'auto';
     }
-    function closeSuccess() { document.getElementById('success-overlay').classList.remove('open'); document.body.style.overflow = 'auto'; }
 
-    function showToast(msg) {
-        const toast = document.createElement('div'); toast.className = 'fixed top-24 left-1/2 -translate-x-1/2 glass border-gold/50 text-gold px-6 py-3 z-[300] font-bold shadow-2xl text-sm';
-        toast.innerText = msg; document.body.appendChild(toast); gsap.from(toast, { y: -50, opacity: 0 });
-        setTimeout(() => { gsap.to(toast, { y: -50, opacity: 0, onComplete: () => toast.remove() }); }, 3000);
+    function callWaiter() {
+        db.ref('waiter_calls').push({ table: currentTable, time: new Date().toISOString() }).then(() => {
+            const toast = document.createElement('div');
+            toast.className = 'fixed top-24 left-1/2 -translate-x-1/2 z-[300] glass px-6 py-3 text-gold text-sm font-bold tracking-wider rounded-2xl';
+            toast.innerHTML = '<i class="fas fa-bell mr-2"></i>Waiter Called!';
+            document.body.appendChild(toast);
+            gsap.fromTo(toast, { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 0.4 });
+            setTimeout(() => { gsap.to(toast, { opacity: 0, y: -20, duration: 0.3, onComplete: () => toast.remove() }); }, 2500);
+        });
     }
-    function callWaiter() { showToast(`Assistance requested for Table ${currentTable}. A waiter is on the way!`); }
-    function scrollToBill() { showToast("Bill request sent to counter. Please wait..."); }
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeCart(); closeSuccess(); } });
+
+    function scrollToBill() {
+        db.ref('bill_requests').push({ table: currentTable, time: new Date().toISOString() }).then(() => {
+            const toast = document.createElement('div');
+            toast.className = 'fixed top-24 left-1/2 -translate-x-1/2 z-[300] glass px-6 py-3 text-emerald-500 text-sm font-bold tracking-wider rounded-2xl';
+            toast.innerHTML = '<i class="fas fa-receipt mr-2"></i>Bill Requested!';
+            document.body.appendChild(toast);
+            gsap.fromTo(toast, { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 0.4 });
+            setTimeout(() => { gsap.to(toast, { opacity: 0, y: -20, duration: 0.3, onComplete: () => toast.remove() }); }, 2500);
+        });
+    }
     </script>
 </body>
 </html>
