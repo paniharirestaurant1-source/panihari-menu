@@ -674,15 +674,19 @@
     }
 
     function callWaiter() {
-        db.ref('waiter_calls').push({ table: currentTable, time: new Date().toISOString() }).then(() => {
-            const toast = document.createElement('div');
-            toast.className = 'fixed top-24 left-1/2 -translate-x-1/2 z-[300] glass px-6 py-3 text-gold text-sm font-bold tracking-wider rounded-2xl';
-            toast.innerHTML = '<i class="fas fa-bell mr-2"></i>Waiter Called!';
-            document.body.appendChild(toast);
-            gsap.fromTo(toast, { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 0.4 });
-            setTimeout(() => { gsap.to(toast, { opacity: 0, y: -20, duration: 0.3, onComplete: () => toast.remove() }); }, 2500);
-        });
-    }
+    db.ref('waiter_calls').push({ 
+        table: currentTable, 
+        time: new Date().toISOString(),
+        longSound: true 
+    }).then(() => {
+        const toast = document.createElement('div');
+        toast.className = 'fixed top-24 left-1/2 -translate-x-1/2 z-[300] glass px-6 py-3 text-gold text-sm font-bold tracking-wider rounded-2xl';
+        toast.innerHTML = '<i class="fas fa-bell mr-2 animate-bounce"></i>Waiter Called!';
+        document.body.appendChild(toast);
+        gsap.fromTo(toast, { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 0.4 });
+        setTimeout(() => { gsap.to(toast, { opacity: 0, y: -20, duration: 0.3, onComplete: () => toast.remove() }); }, 2500);
+    });
+}
 
     function scrollToBill() {
         db.ref('bill_requests').push({ table: currentTable, time: new Date().toISOString() }).then(() => {
