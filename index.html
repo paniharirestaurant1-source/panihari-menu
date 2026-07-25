@@ -518,6 +518,35 @@
         
     ];
 
+    // Correct each dish category from its name so every filter shows matching items.
+    function getCategoryByName(item) {
+        const name = item.name.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+        const has = (...words) => words.some(word => name.includes(word));
+
+        if (item.cat.toLowerCase() === 'thali' || has('4 roti', 'rajma rice', 'lachha paratrha', 'baby naan')) return 'Thali';
+        if (has('ice cream', 'sundae', 'scoop', 'cassata', 'choco chip', 'rajbhog')) return 'Ice Cream';
+        if (has('gulab jamun', 'rasgulla', 'ras malai', 'rasmalai', 'halwa', 'jalebi', 'kheer', 'kaju katli', 'barfi', 'kalakand', 'mysore pak', 'kesar bhati')) return 'Sweets';
+        if (has('tea', 'coffee', 'shake', 'lassi', 'chachh', 'soda', 'water', 'cold drink')) return 'Beverages';
+        if (has('soup')) return 'Soup';
+        if (has('pizza', 'pasta', 'garlic bread', 'alfredo', 'arrabiata')) return 'Pizza & Pasta';
+        if (has('burger', 'sandwich', 'sandwiche', 'special grill')) return 'Burger & Sandwich';
+        if (has('dosa', 'uttapam', 'idli', 'sambar', 'bada')) return 'South Indian';
+        if (has('raita', 'salad', 'plain curd', 'cucumber', 'kachumber')) return 'Raita & Salad';
+        if (has('biryani', 'birayani', 'rice', 'pulao')) return 'Rice';
+        if (has('roti', 'naan', 'paratha', 'kulcha')) return 'Tandoor';
+        if (has('chowmein', 'noodle', 'manchurian', 'chopsuey', 'momo', 'chilly', 'satay', 'sizzler', 'fried rice')) return 'Chinese';
+        if (has('tikka', 'kabab', 'kebab', 'pakora', 'spring roll', 'french fries', 'papad roll', 'platter')) return 'Starters';
+        if (has('chat', 'chaat', 'pav bhaji', 'bhature', 'papad')) return 'Chat';
+        if (has('paneer')) return 'Paneer';
+        if (has('aloo', 'bhindi', 'gobi', 'mushroom', 'palak', 'corn', 'kofta', 'korma', 'sabji', 'saag', 'rajma', 'chana', 'gatta', 'jalfrezi', 'mix veg', 'tawa veg', 'sev tomato', 'kaju curry')) return 'Vegetable';
+        return 'Indian Food';
+    }
+
+    menuItems.forEach(item => {
+        item.name = item.name.trim();
+        item.cat = getCategoryByName(item);
+    });
+
     let currentCategory = 'all';
     let searchQuery = '';
     let cart = {};
@@ -562,12 +591,13 @@
         }); renderMenu();
     }
 
-    function setupSearch() { document.getElementById('menu-search').addEventListener('input', (e) => { searchQuery = e.target.value.toLowerCase(); renderMenu(); }); }
+    function normalizeText(value) { return value.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); }
+    function setupSearch() { document.getElementById('menu-search').addEventListener('input', (e) => { searchQuery = normalizeText(e.target.value); renderMenu(); }); }
     function initAnimations() { gsap.from("#hero-title", { opacity: 0, y: 100, duration: 1, ease: "power4.out", delay: 0.5 }); gsap.from("#hero-subtitle", { opacity: 0, x: -50, duration: 1, ease: "power4.out", delay: 0.8 }); }
 
     function renderMenu() {
         const grid = document.getElementById('menu-grid');
-        const filtered = menuItems.filter(item => { const matchCat = currentCategory === 'all' || item.cat === currentCategory; const matchSearch = item.name.toLowerCase().includes(searchQuery); return matchCat && matchSearch; });
+        const filtered = menuItems.filter(item => { const matchCat = currentCategory === 'all' || item.cat === currentCategory; const matchSearch = normalizeText(item.name).includes(searchQuery); return matchCat && matchSearch; });
         if (filtered.length === 0) {
             grid.innerHTML = '<div class="col-span-full text-center py-16 text-white/30"><i class="fas fa-search text-3xl mb-4"></i><p>No food items found.</p></div>';
             return;
