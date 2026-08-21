@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PANIHARI ORDERS | Kitchen Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+    <style>
+        :root { --gold: #D4AF37; --dark: #0a0a0a; --red: #e63946; --green: #10b981; --orange: #f59e0b; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--dark); color: #fff; font-family: 'Poppins', sans-serif; min-height: 100vh; }
+        h1, h2, h3, .font-luxury { font-family: 'Cinzel', serif; }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #111; }
+        ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
+
+        .stat-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 1rem;
+            padding: 1.25rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover { border-color: rgba(212,175,55,0.3); transform: translateY(-2px); }
+
+        .order-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 1.25rem;
+            padding: 1.25rem;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .order-card.status-new { border-left: 4px solid var(--red); }
+        .order-card.status-preparing { border-left: 4px solid var(--orange); }
+        .order-card.status-done { border-left: 4px solid var(--green); opacity: 0.6; }
+        .order-card.status-done .done-overlay {
+            position: absolute; inset: 0; background: rgba(16,185,129,0.05);
+            display: flex; align-items: center; justify-content: center;
+            pointer-events: none;
+        }
+        .order-card.removing {
+            animation: slideOut 0.5s ease forwards;
+        }
+        @keyframes slideOut {
+            0% { opacity: 1; transform: translateX(0) scale(1); }
+            100% { opacity: 0; transform: translateX(80px) scale(0.9); height: 0; padding: 0; margin: 0; border: 0; overflow: hidden; }
+        }
+        @keyframes slideIn {
+            0% { opacity: 0; transform: translateY(-20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .order-card.entering { animation: slideIn 0.4s ease forwards; }
+
+        .btn-complete {
+            background: rgba(16,185,129,0.1);
+            color: var(--green);
+            border: 1px solid rgba(16,185,129,0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.8rem;
+            transition: all 0.2s ease;
+        }
+        .btn-complete:hover { background: var(--green); color: #000; }
+        .btn-complete:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        .btn-preparing {
+            background: rgba(245,158,11,0.1);
+            color: var(--orange);
+            border: 1px solid rgba(245,158,11,0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.8rem;
+            transition: all 0.2s ease;
+        }
+        .btn-preparing:hover { background: var(--orange); color: #000; }
+        .btn-preparing:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        .btn-clear {
+            background: linear-gradient(135deg, var(--gold), #b8941e);
+            color: #000;
+            padding: 0.75rem 2rem;
+            border-radius: 1rem;
+            cursor: pointer;
+            font-weight: 800;
+            font-size: 0.85rem;
+            letter-spacing: 0.1em;
+            border: none;
+            transition: all 0.25s ease;
+        }
+        .btn-clear:hover { box-shadow: 0 0 25px rgba(212,175,55,0.4); transform: translateY(-2px); }
+        .btn-clear:active { transform: scale(0.97); }
+        .btn-clear:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+        .btn-delete {
+            background: rgba(230,57,70,0.1);
+            color: var(--red);
+            border: 1px solid rgba(230,57,70,0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.8rem;
+            transition: all 0.2s ease;
+        }
+        .btn-delete:hover { background: var(--red); color: #fff; }
+
+        .btn-print {
+            background: rgba(59,130,246,0.12);
+            color: #60a5fa;
+            border: 1px solid rgba(96,165,250,0.35);
+            padding: 0.55rem 1rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.8rem;
+            transition: all 0.2s ease;
+        }
+        .btn-print:hover { background: #3b82f6; color: #fff; border-color: #3b82f6; }
+        .btn-print.bill-requested {
+            background: rgba(212,175,55,0.18);
+            color: var(--gold);
+            border-color: rgba(212,175,55,0.55);
+            box-shadow: 0 0 18px rgba(212,175,55,0.12);
+        }
+
+        .printer-btn {
+            background: rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.75);
+            border: 1px solid rgba(255,255,255,0.12);
+            padding: 0.68rem 0.9rem;
+            border-radius: 0.9rem;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.75rem;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .printer-btn:hover { border-color: var(--gold); color: var(--gold); background: rgba(212,175,55,0.08); }
+        .printer-status {
+            display: inline-flex; align-items: center; gap: 0.45rem;
+            color: rgba(255,255,255,0.45); font-size: 0.7rem; font-weight: 700;
+            padding: 0.55rem 0.75rem; border: 1px solid rgba(255,255,255,0.08); border-radius: 0.8rem;
+            background: rgba(255,255,255,0.025);
+        }
+        .printer-dot { width: 8px; height: 8px; border-radius: 50%; background: #6b7280; box-shadow: 0 0 8px rgba(107,114,128,0.4); }
+        .printer-status.connected { color: var(--green); border-color: rgba(16,185,129,0.25); }
+        .printer-status.connected .printer-dot { background: var(--green); box-shadow: 0 0 10px rgba(16,185,129,0.6); }
+
+        .badge-new { background: var(--red); color: #fff; padding: 0.2rem 0.75rem; border-radius: 999px; font-size: 0.65rem; font-weight: 800; letter-spacing: 0.15em; }
+        .badge-preparing { background: var(--orange); color: #000; padding: 0.2rem 0.75rem; border-radius: 999px; font-size: 0.65rem; font-weight: 800; letter-spacing: 0.15em; }
+        .badge-done { background: var(--green); color: #fff; padding: 0.2rem 0.75rem; border-radius: 999px; font-size: 0.65rem; font-weight: 800; letter-spacing: 0.15em; }
+
+        .toast {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: #111; border: 1px solid rgba(212,175,55,0.3);
+            color: var(--gold); padding: 0.75rem 1.5rem; border-radius: 1rem;
+            font-size: 0.85rem; font-weight: 600; z-index: 999;
+            animation: toastIn 0.3s ease, toastOut 0.3s ease 2s forwards;
+        }
+        @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+        @keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateX(-50%) translateY(20px); } }
+
+        .empty-state { text-align: center; padding: 4rem 2rem; color: rgba(255,255,255,0.15); }
+        .empty-state i { font-size: 4rem; margin-bottom: 1rem; }
+
+        .sound-toggle {
+            position: fixed; top: 1rem; right: 1rem; z-index: 50;
+            width: 44px; height: 44px; border-radius: 50%;
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            color: var(--gold); display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s ease; font-size: 1rem;
+        }
+        .sound-toggle:hover { background: rgba(212,175,55,0.1); border-color: var(--gold); }
+    </style>
+</head>
+<body>
+
+    <button class="sound-toggle" id="soundToggle" onclick="toggleSound()" title="Sound On/Off">
+        <i class="fas fa-volume-high"></i>
+    </button>
+
+    <div class="max-w-6xl mx-auto px-4 py-6">
+
+        <!-- HEADER -->
+        <header class="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
+            <div>
+                <div class="flex items-center gap-3 mb-1">
+                    <i class="fas fa-leaf text-emerald-500 text-xl"></i>
+                    <h1 class="font-luxury text-2xl md:text-3xl tracking-wider" style="color: var(--gold);">PANIHARI ORDERS</h1>
+                </div>
+                <p class="text-xs tracking-[0.3em] text-white/30 uppercase">Real-time Kitchen Dashboard</p>
+            </div>
+            <div class="flex flex-wrap items-center justify-center md:justify-end gap-2">
+                <span class="printer-status" id="printerStatus" title="Direct thermal printer status">
+                    <span class="printer-dot"></span><span id="printerStatusText">PRINTER OFFLINE</span>
+                </span>
+                <button class="printer-btn" onclick="connectBluetoothPrinter()" title="BLE thermal printer connect kare">
+                    <i class="fab fa-bluetooth-b mr-1"></i> CONNECT BT
+                </button>
+                <button class="printer-btn" onclick="connectSerialPrinter()" title="Windows me paired Bluetooth/COM thermal printer connect kare">
+                    <i class="fas fa-plug mr-1"></i> CONNECT COM
+                </button>
+                <button class="btn-clear" id="clearDoneBtn" onclick="clearDoneOrders()" disabled>
+                    <i class="fas fa-trash-can mr-2"></i>CLEAR DONE
+                </button>
+                <button class="btn-delete" onclick="clearAllOrders()" title="Sab Orders Delete Karo">
+                    <i class="fas fa-bomb mr-1"></i> CLEAR ALL
+                </button>
+            </div>
+        </header>
+
+        <!-- STATS -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+            <div class="stat-card">
+                <p class="text-3xl font-bold" style="color: var(--red);" id="statNew">0</p>
+                <p class="text-[10px] tracking-[0.2em] text-white/40 mt-1 uppercase">Pending</p>
+            </div>
+            <div class="stat-card">
+                <p class="text-3xl font-bold" style="color: var(--orange);" id="statPreparing">0</p>
+                <p class="text-[10px] tracking-[0.2em] text-white/40 mt-1 uppercase">Preparing</p>
+            </div>
+            <div class="stat-card">
+                <p class="text-3xl font-bold" style="color: var(--green);" id="statDone">0</p>
+                <p class="text-[10px] tracking-[0.2em] text-white/40 mt-1 uppercase">Completed</p>
+            </div>
+            <div class="stat-card">
+                <p class="text-3xl font-bold" style="color: var(--gold);" id="statRevenue">₹0</p>
+                <p class="text-[10px] tracking-[0.2em] text-white/40 mt-1 uppercase">Today Revenue</p>
+            </div>
+        </div>
+
+        <!-- FILTER TABS -->
+        <div class="flex gap-2 mb-6 overflow-x-auto pb-2">
+            <button onclick="setFilter('all')" data-filter="all" class="filter-btn px-5 py-2 rounded-xl text-sm font-semibold tracking-wider transition-all" style="background: var(--gold); color: #000;">ALL</button>
+            <button onclick="setFilter('new')" data-filter="new" class="filter-btn px-5 py-2 rounded-xl text-sm font-semibold tracking-wider transition-all" style="background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.5);">NEW</button>
+            <button onclick="setFilter('preparing')" data-filter="preparing" class="filter-btn px-5 py-2 rounded-xl text-sm font-semibold tracking-wider transition-all" style="background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.5);">PREPARING</button>
+            <button onclick="setFilter('done')" data-filter="done" class="filter-btn px-5 py-2 rounded-xl text-sm font-semibold tracking-wider transition-all" style="background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.5);">DONE</button>
+        </div>
+
+        <!-- ORDERS LIST -->
+        <div id="ordersList" class="space-y-3 pb-20"></div>
+
+    </div>
+
+    <script>
+    // ===== FIREBASE CONFIG (MENU WALA SAME) =====
+    const firebaseConfig = {
+        apiKey: "AIzaSyCjzN9CJOhCMff2CLpbLvUl66gf1a81Gw8",
+        authDomain: "panihari-orders.firebaseapp.com",
+        databaseURL: "https://panihari-orders-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "panihari-orders",
+        storageBucket: "panihari-orders.firebasestorage.app",
+        messagingSenderId: "886118460552",
+        appId: "1:886118460552:web:6c45c8b757d54ea484433d"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // ===== STATE =====
+    let allOrders = {};
+    let currentFilter = 'all';
+    let soundEnabled = true;
+    let knownOrderIds = new Set();
+    let billRequestedTables = new Set();
+
+    // ===== THERMAL PRINTER STATE =====
+    let printerMode = null; // 'ble' | 'serial' | null
+    let bluetoothDevice = null;
+    let bluetoothCharacteristic = null;
+    let serialPort = null;
+    let serialWriter = null;
+    const RECEIPT_COLUMNS = 32; // 58mm thermal paper
+    const COMMON_PRINTER_SERVICES = [
+        '0000ff00-0000-1000-8000-00805f9b34fb',
+        '0000ffe0-0000-1000-8000-00805f9b34fb',
+        '6e400001-b5a3-f393-e0a9-e50e24dcca9e',
+        '49535343-fe7d-4ae5-8fa9-9fafd205e455'
+    ];
+
+    // ===== SOUND BEEP =====
+   // ===== 10 SEC BELL SOUND =====
+function playBellAlarm10Sec() {
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const startTime = ctx.currentTime;
+        const endTime = startTime + 10; // 10 second tak chalega
+
+        // Bell jarurat - har 0.8 sec me ek ding
+        function scheduleBell(from, to) {
+            let t = from;
+            while (t < to) {
+                // Main bell tone
+                const osc1 = ctx.createOscillator();
+                const gain1 = ctx.createGain();
+                osc1.connect(gain1); gain1.connect(ctx.destination);
+                osc1.frequency.value = 880;
+                osc1.type = 'sine';
+                gain1.gain.setValueAtTime(0, t);
+                gain1.gain.linearRampToValueAtTime(0.35, t + 0.02);
+                gain1.gain.exponentialRampToValueAtTime(0.001, t + 0.6);
+                osc1.start(t);
+                osc1.stop(t + 0.6);
+
+                // Harmonic (richer bell sound)
+                const osc2 = ctx.createOscillator();
+                const gain2 = ctx.createGain();
+                osc2.connect(gain2); gain2.connect(ctx.destination);
+                osc2.frequency.value = 1320;
+                osc2.type = 'sine';
+                gain2.gain.setValueAtTime(0, t);
+                gain2.gain.linearRampToValueAtTime(0.15, t + 0.02);
+                gain2.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+                osc2.start(t);
+                osc2.stop(t + 0.4);
+
+                // Third harmonic
+                const osc3 = ctx.createOscillator();
+                const gain3 = ctx.createGain();
+                osc3.connect(gain3); gain3.connect(ctx.destination);
+                osc3.frequency.value = 2640;
+                osc3.type = 'sine';
+                gain3.gain.setValueAtTime(0, t);
+                gain3.gain.linearRampToValueAtTime(0.08, t + 0.01);
+                gain3.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+                osc3.start(t);
+                osc3.stop(t + 0.25);
+
+                t += 0.8; // har 0.8 sec me ding
+            }
+        }
+
+        scheduleBell(startTime, endTime);
+
+        // 10 sec baad khud band ho jayega
+        setTimeout(() => {
+            try { ctx.close(); } catch(e) {}
+        }, 10500);
+
+    } catch(e) {}
+}
+
+// Normal short beep (naye order ke liye)
+function playBeep() {
+    if (!soundEnabled) return;
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.frequency.value = 880; osc.type = 'sine';
+        gain.gain.value = 0.3;
+        osc.start();
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+        osc.stop(ctx.currentTime + 0.5);
+        setTimeout(() => {
+            const osc2 = ctx.createOscillator();
+            const gain2 = ctx.createGain();
+            osc2.connect(gain2); gain2.connect(ctx.destination);
+            osc2.frequency.value = 1100; osc2.type = 'sine';
+            gain2.gain.value = 0.3;
+            osc2.start();
+            gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+            osc2.stop(ctx.currentTime + 0.4);
+        }, 200);
+    } catch(e) {}
+}
+
+    function toggleSound() {
+        soundEnabled = !soundEnabled;
+        const icon = document.querySelector('#soundToggle i');
+        icon.className = soundEnabled ? 'fas fa-volume-high' : 'fas fa-volume-xmark';
+        showToast(soundEnabled ? 'Sound ON' : 'Sound OFF');
+    }
+
+    // ===== TIME FORMAT =====
+    function formatTime(isoString) {
+        if (!isoString) return '--';
+        try {
+            const d = new Date(isoString);
+            return d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }) +
+                   ' · ' + d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+        } catch(e) { return isoString; }
+    }
+
+    // ===== FILTER =====
+    function setFilter(f) {
+        currentFilter = f;
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            if (btn.dataset.filter === f) {
+                btn.style.background = 'var(--gold)';
+                btn.style.color = '#000';
+            } else {
+                btn.style.background = 'rgba(255,255,255,0.05)';
+                btn.style.color = 'rgba(255,255,255,0.5)';
+            }
+        });
+        renderOrders();
+    }
+
+    // ===== TOAST =====
+    function showToast(msg) {
+        const t = document.createElement('div');
+        t.className = 'toast';
+        t.innerHTML = '<i class="fas fa-check-circle mr-2"></i>' + msg;
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 2500);
+    }
+
+    // ===== UPDATE STATS =====
+    function updateStats() {
+        let newCount = 0, prepCount = 0, doneCount = 0, revenue = 0;
+        const today = new Date().toDateString();
+        Object.values(allOrders).forEach(order => {
+            if (order.status === 'new') newCount++;
+            else if (order.status === 'preparing') prepCount++;
+            else if (order.status === 'done') doneCount++;
+            // Aaj ki revenue sirf done orders se
+            if (order.status === 'done') {
+                try {
+                    const orderDate = new Date(order.time).toDateString();
+                    if (orderDate === today) revenue += (order.total || 0);
+                } catch(e) {}
+            }
+        });
+        document.getElementById('statNew').textContent = newCount;
+        document.getElementById('statPreparing').textContent = prepCount;
+        document.getElementById('statDone').textContent = doneCount;
+        document.getElementById('statRevenue').textContent = '₹' + revenue;
+
+        // Clear Done button enable/disable
+        document.getElementById('clearDoneBtn').disabled = doneCount === 0;
+
+        // Browser title me pending count
+        document.title = newCount > 0 ? `(${newCount}) PANIHARI ORDERS` : 'PANIHARI ORDERS';
+    }
+
+    // ===== RENDER ORDERS =====
+    function renderOrders() {
+        const container = document.getElementById('ordersList');
+        let orders = Object.entries(allOrders);
+
+        // Filter
+        if (currentFilter !== 'all') {
+            orders = orders.filter(([id, o]) => o.status === currentFilter);
+        }
+
+        // Sort: new first (newest), then preparing, then done (oldest first)
+        orders.sort((a, b) => {
+            const statusOrder = { 'new': 0, 'preparing': 1, 'done': 2 };
+            const sa = statusOrder[a[1].status] ?? 3;
+            const sb = statusOrder[b[1].status] ?? 3;
+            if (sa !== sb) return sa - sb;
+            // Same status me newest first (except done me oldest first)
+            const ta = new Date(a[1].time || 0).getTime();
+            const tb = new Date(b[1].time || 0).getTime();
+            return sa === 2 ? ta - tb : tb - ta;
+        });
+
+        if (orders.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-utensils"></i>
+                    <p class="text-lg font-semibold">there is no one</p>
+                    <p class="text-sm mt-2 opacity-50">New orders will automatically appear here.</p>
+                </div>`;
+            return;
+        }
+
+        container.innerHTML = orders.map(([id, order]) => {
+            const statusClass = 'status-' + (order.status || 'new');
+            const isDone = order.status === 'done';
+            const isNew = order.status === 'new';
+            const isPreparing = order.status === 'preparing';
+            const items = order.items || [];
+            const billRequested = billRequestedTables.has(order.table);
+
+            const badgeHtml = isNew ? '<span class="badge-new">NEW</span>'
+                : isPreparing ? '<span class="badge-preparing">PREPARING</span>'
+                : '<span class="badge-done">DONE</span>';
+
+            const itemsHtml = items.map(item =>
+                `<div class="flex justify-between items-center py-1.5 border-b border-white/5 last:border-0">
+                    <span class="text-sm text-white/80">${item.name || 'Item'}</span>
+                    <span class="text-sm text-white/50">×${item.qty || 1}</span>
+                    <span class="text-sm font-semibold" style="color: var(--gold);">₹${item.sub || (item.price * item.qty) || 0}</span>
+                </div>`
+            ).join('');
+
+            return `
+            <div class="order-card ${statusClass} entering" id="order-${id}">
+                ${isDone ? '<div class="done-overlay"><i class="fas fa-check-circle text-5xl text-emerald-500/20"></i></div>' : ''}
+                <div class="flex flex-col md:flex-row md:items-start justify-between gap-3">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-3 mb-3 flex-wrap">
+                            ${badgeHtml}
+                            <span class="text-white/30 text-xs"><i class="fas fa-clock mr-1"></i>${formatTime(order.time)}</span>
+                        </div>
+                        <div class="flex items-center gap-3 mb-3">
+                            <span class="px-3 py-1 rounded-lg text-sm font-bold tracking-wider" style="background: linear-gradient(135deg, var(--gold), #b8941e); color: #000;">
+                                TABLE ${order.table || '?'}
+                            </span>
+                            ${order.orderNo ? `<span class="text-[10px] text-white/30 tracking-wider">${order.orderNo}</span>` : ''}
+                            ${order.billPrintedAt ? '<span class="text-[10px] text-emerald-400/70"><i class="fas fa-print mr-1"></i>BILL PRINTED</span>' : ''}
+                        </div>
+                        <div class="space-y-0 mb-3">${itemsHtml}</div>
+                        <div class="flex items-center gap-4 text-xs text-white/30">
+                            ${order.subtotal ? `<span>Subtotal: ₹${order.subtotal}</span>` : ''}
+                            ${order.gst ? `<span>GST: ₹${order.gst}</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-end gap-3 md:min-w-[160px]">
+                        <div class="text-right">
+                            <p class="text-[10px] text-white/30 uppercase tracking-widest">Total</p>
+                            <p class="text-2xl font-bold" style="color: var(--gold);">₹${order.total || 0}</p>
+                        </div>
+                        <div class="flex flex-col gap-2 w-full">
+                            ${isNew ? `<button class="btn-preparing w-full" onclick="markPreparing('${id}')"><i class="fas fa-fire-burner mr-1"></i> START</button>` : ''}
+                            ${!isDone ? `<button class="btn-complete w-full" onclick="markDone('${id}')"><i class="fas fa-check mr-1"></i> COMPLETE</button>` : ''}
+                            <button class="btn-print w-full ${billRequested ? 'bill-requested' : ''}" onclick="printTableBill('${order.table || ''}')"><i class="fas fa-receipt mr-1"></i> ${billRequested ? 'PRINT BILL • REQUESTED' : 'PRINT TABLE BILL'}</button>
+                            <button class="btn-delete w-full" onclick="deleteSingleOrder('${id}')"><i class="fas fa-trash mr-1"></i> DELETE</button>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    // ===== THERMAL BILL / PRINTER =====
+    function setPrinterStatus(connected, text) {
+        const status = document.getElementById('printerStatus');
+        const label = document.getElementById('printerStatusText');
+        if (!status || !label) return;
+        status.classList.toggle('connected', !!connected);
+        label.textContent = text || (connected ? 'PRINTER READY' : 'PRINTER OFFLINE');
+    }
+
+    async function connectBluetoothPrinter() {
+        if (!navigator.bluetooth) {
+            alert('Web Bluetooth is browser me available nahi hai. Chrome/Edge me HTTPS ya localhost use karein, ya CONNECT COM use karein.');
+            return;
+        }
+        try {
+            showToast('Bluetooth printer select karein...');
+            bluetoothDevice = await navigator.bluetooth.requestDevice({
+                acceptAllDevices: true,
+                optionalServices: COMMON_PRINTER_SERVICES
+            });
+
+            bluetoothDevice.addEventListener('gattserverdisconnected', () => {
+                if (printerMode === 'ble') {
+                    printerMode = null;
+                    bluetoothCharacteristic = null;
+                    setPrinterStatus(false, 'PRINTER OFFLINE');
+                    showToast('Bluetooth Printer Disconnected');
+                }
+            });
+
+            const server = await bluetoothDevice.gatt.connect();
+            let writable = null;
+
+            // Common BLE thermal-printer services me writable characteristic dhoondo.
+            for (const serviceUuid of COMMON_PRINTER_SERVICES) {
+                try {
+                    const service = await server.getPrimaryService(serviceUuid);
+                    const chars = await service.getCharacteristics();
+                    writable = chars.find(c => c.properties.write || c.properties.writeWithoutResponse);
+                    if (writable) break;
+                } catch (e) {}
+            }
+
+            // Agar browser allowed services expose karta hai to unme bhi try karo.
+            if (!writable) {
+                try {
+                    const services = await server.getPrimaryServices();
+                    for (const service of services) {
+                        try {
+                            const chars = await service.getCharacteristics();
+                            writable = chars.find(c => c.properties.write || c.properties.writeWithoutResponse);
+                            if (writable) break;
+                        } catch (e) {}
+                    }
+                } catch (e) {}
+            }
+
+            if (!writable) {
+                try { bluetoothDevice.gatt.disconnect(); } catch (e) {}
+                throw new Error('Writable BLE print service nahi mila. Ye printer Bluetooth Classic/SPP ho sakta hai; CONNECT COM try karein.');
+            }
+
+            bluetoothCharacteristic = writable;
+            printerMode = 'ble';
+            setPrinterStatus(true, 'BT: ' + (bluetoothDevice.name || 'CONNECTED'));
+            showToast('Bluetooth Printer Connected!');
+        } catch (err) {
+            console.error('Bluetooth printer error:', err);
+            if (err && err.name === 'NotFoundError') return;
+            alert('Bluetooth printer connect nahi hua.\n\n' + (err.message || err) + '\n\nAgar printer Windows Bluetooth me paired hai to CONNECT COM try karein.');
+        }
+    }
+
+    async function connectSerialPrinter() {
+        if (!('serial' in navigator)) {
+            alert('Web Serial available nahi hai. Desktop Chrome/Edge use karein. Printer ko Windows Bluetooth me pair karke COM port banayein, phir dobara try karein.');
+            return;
+        }
+        try {
+            if (serialWriter) {
+                try { serialWriter.releaseLock(); } catch(e) {}
+                serialWriter = null;
+            }
+            if (serialPort) {
+                try { await serialPort.close(); } catch(e) {}
+            }
+
+            showToast('Bluetooth/COM printer port select karein...');
+            serialPort = await navigator.serial.requestPort();
+            await serialPort.open({ baudRate: 9600 });
+            serialWriter = serialPort.writable.getWriter();
+            printerMode = 'serial';
+            setPrinterStatus(true, 'COM PRINTER READY');
+            showToast('COM Printer Connected!');
+        } catch (err) {
+            console.error('Serial printer error:', err);
+            if (err && err.name === 'NotFoundError') return;
+            alert('COM printer connect nahi hua: ' + (err.message || err));
+        }
+    }
+
+    function money(v) {
+        const n = Number(v || 0);
+        return Number.isFinite(n) ? Math.round(n) : 0;
+    }
+
+    function getTableBillData(table) {
+        const tableOrders = Object.entries(allOrders)
+            .filter(([id, o]) => o && o.table === table)
+            .sort((a, b) => new Date(a[1].time || 0) - new Date(b[1].time || 0));
+
+        if (tableOrders.length === 0) return null;
+
+        const merged = new Map();
+        let subtotal = 0, gst = 0, total = 0;
+
+        tableOrders.forEach(([id, order]) => {
+            const items = order.items || [];
+            items.forEach(item => {
+                const name = String(item.name || 'Item');
+                const price = money(item.price);
+                const qty = money(item.qty || 1) || 1;
+                const sub = money(item.sub || (price * qty));
+                const key = name + '|' + price;
+                if (!merged.has(key)) merged.set(key, { name, price, qty: 0, sub: 0 });
+                const row = merged.get(key);
+                row.qty += qty;
+                row.sub += sub;
+            });
+            subtotal += money(order.subtotal);
+            gst += money(order.gst);
+            total += money(order.total);
+        });
+
+        // Old orders me subtotal/gst/total missing ho to items se calculate karo.
+        if (!subtotal) subtotal = Array.from(merged.values()).reduce((s, i) => s + i.sub, 0);
+        if (!gst) gst = Math.round(subtotal * 0.05);
+        if (!total) total = subtotal + gst;
+
+        const firstOrder = tableOrders[0][1];
+        const lastOrder = tableOrders[tableOrders.length - 1][1];
+        const billNo = 'B' + String(table || '').replace(/[^0-9A-Za-z]/g, '') + '-' + Date.now().toString().slice(-6);
+
+        return {
+            billNo,
+            table,
+            orderCount: tableOrders.length,
+            orderIds: tableOrders.map(([id]) => id),
+            items: Array.from(merged.values()),
+            subtotal,
+            gst,
+            total,
+            time: lastOrder.time || firstOrder.time || new Date().toISOString()
+        };
+    }
+
+    function wrapText(text, width) {
+        const words = String(text || '').split(/\s+/).filter(Boolean);
+        const lines = [];
+        let line = '';
+        words.forEach(word => {
+            if (!line) line = word;
+            else if ((line + ' ' + word).length <= width) line += ' ' + word;
+            else { lines.push(line); line = word; }
+        });
+        if (line) lines.push(line);
+        return lines.length ? lines : [''];
+    }
+
+    function twoCol(left, right, width = RECEIPT_COLUMNS) {
+        left = String(left || '');
+        right = String(right || '');
+        const minGap = 1;
+        const maxLeft = Math.max(1, width - right.length - minGap);
+        if (left.length > maxLeft) left = left.slice(0, maxLeft);
+        const gap = Math.max(minGap, width - left.length - right.length);
+        return left + ' '.repeat(gap) + right;
+    }
+
+    function buildEscPosReceipt(bill) {
+        const ESC = 0x1B, GS = 0x1D;
+        const bytes = [];
+        const push = (...arr) => bytes.push(...arr);
+        const encoder = new TextEncoder();
+        const text = (s) => push(...encoder.encode(String(s)));
+        const line = '-'.repeat(RECEIPT_COLUMNS);
+
+        push(ESC, 0x40);                 // init
+        push(ESC, 0x61, 0x01);           // center
+        push(ESC, 0x45, 0x01);           // bold on
+        push(GS, 0x21, 0x11);            // double size
+        text('PANIHARI\n');
+        push(GS, 0x21, 0x00);
+        text('PURE VEG RESTAURANT\n');
+        push(ESC, 0x45, 0x00);
+        text(line + '\n');
+        push(ESC, 0x61, 0x00);           // left
+        text(twoCol('Bill: ' + bill.billNo, 'Table: ' + bill.table) + '\n');
+        text('Date: ' + formatTime(bill.time).replace(' · ', ' ') + '\n');
+        text('Orders: ' + bill.orderCount + '\n');
+        text(line + '\n');
+        text(twoCol('ITEM / QTY', 'AMOUNT') + '\n');
+        text(line + '\n');
+
+        bill.items.forEach(item => {
+            const amount = 'Rs.' + money(item.sub);
+            const nameLines = wrapText(item.name, Math.max(10, RECEIPT_COLUMNS - amount.length - 1));
+            text(twoCol(nameLines[0], amount) + '\n');
+            for (let i = 1; i < nameLines.length; i++) text(nameLines[i] + '\n');
+            text('  ' + money(item.qty) + ' x Rs.' + money(item.price) + '\n');
+        });
+
+        text(line + '\n');
+        text(twoCol('Subtotal', 'Rs.' + money(bill.subtotal)) + '\n');
+        text(twoCol('GST (5%)', 'Rs.' + money(bill.gst)) + '\n');
+        push(ESC, 0x45, 0x01);
+        text(twoCol('TOTAL', 'Rs.' + money(bill.total)) + '\n');
+        push(ESC, 0x45, 0x00);
+        text(line + '\n');
+        push(ESC, 0x61, 0x01);
+        text('THANK YOU! VISIT AGAIN\n');
+        text('Panihari Pure Veg\n');
+        text('\n\n\n');
+        push(ESC, 0x61, 0x00);
+        return new Uint8Array(bytes);
+    }
+
+    async function writeBluetooth(data) {
+        if (!bluetoothCharacteristic) throw new Error('Bluetooth printer not connected');
+        const chunkSize = 180;
+        for (let i = 0; i < data.length; i += chunkSize) {
+            const chunk = data.slice(i, i + chunkSize);
+            if (bluetoothCharacteristic.properties.writeWithoutResponse && bluetoothCharacteristic.writeValueWithoutResponse) {
+                await bluetoothCharacteristic.writeValueWithoutResponse(chunk);
+            } else if (bluetoothCharacteristic.writeValue) {
+                await bluetoothCharacteristic.writeValue(chunk);
+            } else {
+                throw new Error('Printer characteristic writable nahi hai');
+            }
+            await new Promise(r => setTimeout(r, 25));
+        }
+    }
+
+    async function writeSerial(data) {
+        if (!serialWriter) throw new Error('COM printer not connected');
+        await serialWriter.write(data);
+    }
+
+    function escapeHtml(s) {
+        return String(s ?? '')
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#039;');
+    }
+
+    function printBillWithBrowser(bill) {
+        const rows = bill.items.map(item => `
+            <tr>
+                <td><b>${escapeHtml(item.name)}</b><br><small>${money(item.qty)} × ₹${money(item.price)}</small></td>
+                <td class="amount">₹${money(item.sub)}</td>
+            </tr>`).join('');
+
+        const w = window.open('', '_blank', 'width=420,height=720');
+        if (!w) {
+            alert('Print window block ho gaya. Browser popup allow karke dobara PRINT BILL dabayein.');
+            return false;
+        }
+        w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${escapeHtml(bill.billNo)}</title>
+        <style>
+            @page { size: 58mm auto; margin: 2mm; }
+            * { box-sizing: border-box; }
+            body { margin:0; width:54mm; font-family: Arial, sans-serif; color:#000; font-size:11px; line-height:1.3; }
+            .c { text-align:center; } h1 { font-size:20px; margin:0; } .sub { font-size:9px; }
+            .dash { border-top:1px dashed #000; margin:5px 0; }
+            .meta { display:flex; justify-content:space-between; gap:6px; font-size:10px; }
+            table { width:100%; border-collapse:collapse; } td { padding:4px 0; vertical-align:top; border-bottom:1px dotted #aaa; }
+            td.amount { text-align:right; white-space:nowrap; font-weight:700; }
+            .totals { margin-top:5px; } .row { display:flex; justify-content:space-between; padding:2px 0; }
+            .grand { font-size:15px; font-weight:800; border-top:1px dashed #000; border-bottom:1px dashed #000; padding:5px 0; margin-top:3px; }
+            .thanks { margin-top:10px; text-align:center; font-weight:700; }
+        </style></head><body>
+            <div class="c"><h1>PANIHARI</h1><div class="sub">PURE VEG FAMILY RESTAURANT</div></div>
+            <div class="dash"></div>
+            <div class="meta"><span>Bill: ${escapeHtml(bill.billNo)}</span><span>Table: ${escapeHtml(bill.table)}</span></div>
+            <div class="meta"><span>${escapeHtml(formatTime(bill.time))}</span><span>${bill.orderCount} order(s)</span></div>
+            <div class="dash"></div>
+            <table>${rows}</table>
+            <div class="totals">
+                <div class="row"><span>Subtotal</span><b>₹${money(bill.subtotal)}</b></div>
+                <div class="row"><span>GST (5%)</span><b>₹${money(bill.gst)}</b></div>
+                <div class="row grand"><span>TOTAL</span><span>₹${money(bill.total)}</span></div>
+            </div>
+            <div class="thanks">THANK YOU!<br><span class="sub">Visit Again</span></div>
+        </body></html>`);
+        w.document.close();
+        w.focus();
+        setTimeout(() => { w.print(); }, 250);
+        return true;
+    }
+
+    async function markBillPrinted(bill) {
+        const updates = {};
+        const now = new Date().toISOString();
+        bill.orderIds.forEach(id => { updates['orders/' + id + '/billPrintedAt'] = now; });
+        try { await db.ref().update(updates); } catch (e) { console.warn('billPrintedAt update failed', e); }
+        billRequestedTables.delete(bill.table);
+        renderOrders();
+    }
+
+    async function printTableBill(table) {
+        const bill = getTableBillData(table);
+        if (!bill) {
+            showToast('Is table ke liye order nahi mila');
+            return;
+        }
+
+        try {
+            if (printerMode === 'ble' && bluetoothCharacteristic) {
+                showToast('Bluetooth se bill print ho raha hai...');
+                await writeBluetooth(buildEscPosReceipt(bill));
+                await markBillPrinted(bill);
+                showToast('Bill Printed - TABLE ' + table);
+                return;
+            }
+            if (printerMode === 'serial' && serialWriter) {
+                showToast('COM printer se bill print ho raha hai...');
+                await writeSerial(buildEscPosReceipt(bill));
+                await markBillPrinted(bill);
+                showToast('Bill Printed - TABLE ' + table);
+                return;
+            }
+
+            // Direct printer connected nahi ho to browser ka normal print dialog khulta hai.
+            if (printBillWithBrowser(bill)) {
+                showToast('System Print Dialog Opened');
+            }
+        } catch (err) {
+            console.error('Print error:', err);
+            alert('Direct print failed: ' + (err.message || err) + '\n\nSystem print dialog khol raha hoon.');
+            printBillWithBrowser(bill);
+        }
+    }
+
+    // ===== MARK PREPARING =====
+    function markPreparing(orderId) {
+        if (!orderId) return;
+        db.ref('orders/' + orderId + '/status').set('preparing').then(() => {
+            showToast('Order Preparing Me Gayi!');
+        }).catch(err => {
+            alert('Error: ' + err.message);
+        });
+    }
+
+    // ===== MARK DONE =====
+    function markDone(orderId) {
+        if (!orderId) return;
+        db.ref('orders/' + orderId + '/status').set('done').then(() => {
+            showToast('Order Complete!');
+        }).catch(err => {
+            alert('Error: ' + err.message);
+        });
+    }
+
+    // ===== DELETE SINGLE ORDER =====
+    function deleteSingleOrder(orderId) {
+        if (!orderId) return;
+        if (!confirm('Yeh order delete karna hai?')) return;
+        // Animation
+        const el = document.getElementById('order-' + orderId);
+        if (el) el.classList.add('removing');
+
+        setTimeout(() => {
+            db.ref('orders/' + orderId).remove().then(() => {
+                showToast('Order Deleted!');
+            }).catch(err => {
+                alert('Error: ' + err.message);
+            });
+        }, 500);
+    }
+
+    // ===== CLEAR DONE ORDERS (MAIN FIX) =====
+    function clearDoneOrders() {
+        const doneOrders = Object.entries(allOrders).filter(([id, o]) => o.status === 'done');
+        if (doneOrders.length === 0) {
+            showToast('Koi Done Order Nahi Hai');
+            return;
+        }
+
+        if (!confirm(`${doneOrders.length} done orders clear karna hai?`)) return;
+
+        // Pehle animation lagao
+        doneOrders.forEach(([id]) => {
+            const el = document.getElementById('order-' + id);
+            if (el) el.classList.add('removing');
+        });
+
+        // Phir Firebase se delete karo - EK EK KARKE
+        setTimeout(() => {
+            let deleteCount = 0;
+            let totalDone = doneOrders.length;
+
+            doneOrders.forEach(([id]) => {
+                db.ref('orders/' + id).remove()
+                    .then(() => {
+                        deleteCount++;
+                        if (deleteCount === totalDone) {
+                            showToast(`${totalDone} Orders Cleared!`);
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Delete error for ' + id, err);
+                        deleteCount++;
+                    });
+            });
+        }, 500);
+    }
+
+    // ===== CLEAR ALL ORDERS =====
+    function clearAllOrders() {
+        const allIds = Object.keys(allOrders);
+        if (allIds.length === 0) {
+            showToast('Koi Order Nahi Hai');
+            return;
+        }
+        if (!confirm(`SAARE ${allIds.length} orders delete karna hai? Ye irreversible hai!`)) return;
+
+        // Animation sab pe
+        allIds.forEach(id => {
+            const el = document.getElementById('order-' + id);
+            if (el) el.classList.add('removing');
+        });
+
+        setTimeout(() => {
+            let count = 0;
+            let total = allIds.length;
+            allIds.forEach(id => {
+                db.ref('orders/' + id).remove()
+                    .then(() => {
+                        count++;
+                        if (count === total) showToast('Sab Orders Cleared!');
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        count++;
+                    });
+            });
+        }, 500);
+    }
+
+    // ===== FIREBASE REAL-TIME LISTENER =====
+    db.ref('orders').on('value', (snapshot) => {
+        const data = snapshot.val() || {};
+        const prevCount = Object.keys(allOrders).length;
+        allOrders = data;
+
+        // Naya order aaya hai? (pehle se nahi tha aur status new hai)
+        Object.entries(data).forEach(([id, order]) => {
+            if (!knownOrderIds.has(id) && order.status === 'new') {
+                playBeep();
+            }
+            knownOrderIds.add(id);
+        });
+
+        // Purane orders jo delete ho gaye unko known set se hatado
+        knownOrderIds.forEach(id => {
+            if (!data[id]) knownOrderIds.delete(id);
+        });
+
+        updateStats();
+        renderOrders();
+    });
+
+    // ===== WAITER CALLS LISTENER =====
+db.ref('waiter_calls').on('child_added', (snapshot) => {
+    const call = snapshot.val();
+    if (call && call.table) {
+        // Agar longSound true hai toh 10 sec bell, nahi toh short beep
+        if (call.longSound && soundEnabled) {
+            playBellAlarm10Sec();
+        } else {
+            playBeep();
+        }
+        showToast(`🔔 Waiter Called - TABLE ${call.table}`);
+        // 12 sec baad delete (10 sec sound + 2 sec buffer)
+        setTimeout(() => { snapshot.ref.remove().catch(() => {}); }, 12000);
+    }
+});
+
+    // ===== BILL REQUESTS LISTENER =====
+    db.ref('bill_requests').on('child_added', (snapshot) => {
+        const req = snapshot.val();
+        if (req && req.table) {
+            billRequestedTables.add(req.table);
+            playBeep();
+            renderOrders();
+            showToast(`Bill Request - TABLE ${req.table} • PRINT TABLE BILL`);
+            setTimeout(() => {
+                snapshot.ref.remove().catch(() => {});
+            }, 10000);
+        }
+    });
+
+    </script>
+</body>
+</html>
