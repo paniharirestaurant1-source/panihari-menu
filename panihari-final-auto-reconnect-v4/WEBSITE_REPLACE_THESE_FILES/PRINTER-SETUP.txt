@@ -1,0 +1,33 @@
+PANIHARI MENU - UNIVERSAL PRINTER SUPPORT
+=========================================
+
+Owner dashboard: owner.html
+Open PRINTER button at the top.
+
+Supported modes:
+1. Android Native Bridge - Bluetooth Classic/SPP + USB OTG (recommended for Table/Vyapar portable printers)
+2. Bluetooth BLE - Chrome Web Bluetooth thermal printers
+3. USB / Serial - Chrome/Edge Web Serial printers
+4. USB Direct - WebUSB bulk-compatible printers
+5. System Print - browser/OS print dialog fallback
+
+Features added:
+- Printer setup panel
+- Printer connection status
+- Auto Print toggle (saves on device)
+- Automatic KOT printing on NEW orders after dashboard is already open
+- Manual PRINT KOT on each order
+- TEST PRINT
+- Disconnect button
+- 58mm-safe 32-character ESC/POS KOT format
+
+IMPORTANT ABOUT BLUETOOTH CLASSIC:
+A normal website/browser cannot directly access Bluetooth Classic SPP devices.
+For a Table/Vyapar-type portable Bluetooth printer, wrap owner.html in an Android app/WebView
+that exposes window.VasukiPrinter with these methods:
+  connectPrinter()
+  disconnectPrinter()
+  printBase64(base64EscPosBytes)
+The website already detects and uses this bridge automatically.
+
+For USB Serial/WebUSB/BLE, HTTPS (or localhost) and Chrome/Edge are required.
