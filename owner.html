@@ -756,9 +756,7 @@ function playBeep() {
         if (name === null) return null;
         const phone = prompt('Customer Mobile Number (optional):', '');
         if (phone === null) return null;
-        const gstin = prompt('Customer GST Number (optional):', '');
-        if (gstin === null) return null;
-        return { name: name.trim(), phone: phone.trim(), gstin: gstin.trim().toUpperCase() };
+        return { name: name.trim(), phone: phone.trim() };
     }
 
     function escPosQrCommands(value) {
@@ -859,7 +857,6 @@ function playBeep() {
         t(twoCol('Table: ' + bill.table, 'Invoice: ' + bill.billNo) + '\n');
         if (bill.customer && bill.customer.name) t('Party: ' + bill.customer.name + '\n');
         if (bill.customer && bill.customer.phone) t('Mobile: ' + bill.customer.phone + '\n');
-        if (bill.customer && bill.customer.gstin) t('Party GSTIN: ' + bill.customer.gstin + '\n');
         t(line + '\n');
         b(ESC,0x45,0x01);
         t(twoCol('Item Name', 'Price Amount') + '\n');
@@ -984,7 +981,7 @@ function playBeep() {
             .pay-qr { width:28mm; height:28mm; display:block; margin:1.5mm auto .5mm; }
         </style></head><body>
             <div class="center">
-                <img class="logo" src="${PANIHARI_LOGO_DATA_URI}" alt="Panihari logo">
+                <img class="logo" src="panihari-logo-original.png" alt="Panihari Veg. Restaurant logo">
                 <div class="restaurant">${escapeHtml(PANIHARI_INFO.name)}</div>
                 <div>${escapeHtml(PANIHARI_INFO.address1)}</div>
                 <div>${escapeHtml(PANIHARI_INFO.address2)}</div>
@@ -1001,7 +998,6 @@ function playBeep() {
             <div class="twocol"><span>Table: ${escapeHtml(bill.table)}</span><span>Invoice no: ${escapeHtml(bill.billNo)}</span></div>
             ${bill.customer && bill.customer.name ? `<div><b>Party:</b> ${escapeHtml(bill.customer.name)}</div>` : ''}
             ${bill.customer && bill.customer.phone ? `<div><b>Mobile:</b> ${escapeHtml(bill.customer.phone)}</div>` : ''}
-            ${bill.customer && bill.customer.gstin ? `<div><b>Party GSTIN:</b> ${escapeHtml(bill.customer.gstin)}</div>` : ''}
             <div class="dash"></div>
             <div class="item-head"><span>Item Name</span><span class="right">Price</span><span class="right">Amount</span></div>
             <b>Qty</b>
