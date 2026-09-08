@@ -546,7 +546,8 @@ function playBeep() {
                         <div class="flex flex-col gap-2 w-full">
                             ${isNew ? `<button class="btn-preparing w-full" onclick="markPreparing('${id}')"><i class="fas fa-fire-burner mr-1"></i> START</button>` : ''}
                             ${!isDone ? `<button class="btn-complete w-full" onclick="markDone('${id}')"><i class="fas fa-check mr-1"></i> COMPLETE</button>` : ''}
-                            <button class="btn-print w-full ${billRequested ? 'bill-requested' : ''}" onclick="printTableBill('${order.table || ''}')"><i class="fas fa-receipt mr-1"></i> ${billRequested ? 'PRINT BILL • REQUESTED' : 'PRINT TABLE BILL'}</button>
+                            <button class="btn-print w-full" onclick="printKOT('${id}')"><i class="fas fa-kitchen-set mr-1"></i> PRINT K.O.T</button>
+                            <button class="btn-print w-full ${billRequested ? 'bill-requested' : ''}" onclick="printPartyBill('${order.table || ''}')"><i class="fas fa-receipt mr-1"></i> ${billRequested ? 'PARTY BILL • REQUESTED' : 'PRINT PARTY BILL'}</button>
                             <button class="btn-delete w-full" onclick="deleteSingleOrder('${id}')"><i class="fas fa-trash mr-1"></i> DELETE</button>
                         </div>
                     </div>
@@ -750,6 +751,34 @@ function playBeep() {
         return { date, time };
     }
 
+    function getCustomerDetails() {
+        const name = prompt('Customer / Party Name (optional):', '');
+        if (name === null) return null;
+        const phone = prompt('Customer Mobile Number (optional):', '');
+        if (phone === null) return null;
+        const gstin = prompt('Customer GST Number (optional):', '');
+        if (gstin === null) return null;
+        return { name: name.trim(), phone: phone.trim(), gstin: gstin.trim().toUpperCase() };
+    }
+
+    function escPosQrCommands(value) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(String(value));
+        const storeLength = data.length + 3;
+        const pL = storeLength & 0xff;
+        const pH = (storeLength >> 8) & 0xff;
+        const out = new Uint8Array(41 + data.length);
+        let o = 0;
+        const add = arr => { out.set(arr, o); o += arr.length; };
+        add([0x1D,0x28,0x6B,0x04,0x00,0x31,0x41,0x32,0x00]); // model 2
+        add([0x1D,0x28,0x6B,0x03,0x00,0x31,0x43,0x06]);      // module size
+        add([0x1D,0x28,0x6B,0x03,0x00,0x31,0x45,0x31]);      // error correction M
+        add([0x1D,0x28,0x6B,pL,pH,0x31,0x50,0x30]);
+        add(data);
+        add([0x1D,0x28,0x6B,0x03,0x00,0x31,0x51,0x30]);
+        return out;
+    }
+
     // Logo ko ESC/POS GS v 0 raster command me convert karta hai.
     // Isse BLE/COM direct printing me bhi supplied Panihari logo print hota hai.
     let cachedLogoRaster = null;
@@ -828,6 +857,9 @@ function playBeep() {
         t(twoCol('Place of Supply:', '') + '\n');
         t(twoCol(PANIHARI_INFO.placeOfSupply, 'Time: ' + dt.time) + '\n');
         t(twoCol('Table: ' + bill.table, 'Invoice: ' + bill.billNo) + '\n');
+        if (bill.customer && bill.customer.name) t('Party: ' + bill.customer.name + '\n');
+        if (bill.customer && bill.customer.phone) t('Mobile: ' + bill.customer.phone + '\n');
+        if (bill.customer && bill.customer.gstin) t('Party GSTIN: ' + bill.customer.gstin + '\n');
         t(line + '\n');
         b(ESC,0x45,0x01);
         t(twoCol('Item Name', 'Price Amount') + '\n');
@@ -862,6 +894,10 @@ function playBeep() {
         t(twoCol('Total Tax:', fmtMoney(bill.gst)) + '\n');
         b(ESC,0x45,0x00);
         t(line + '\n');
+        b(ESC,0x61,0x01);
+        t('SCAN TO PAY\n');
+        chunks.push(escPosQrCommands('upi://pay?pa=panihari@upi&pn=Panihari%20Veg%20Restaurant&cu=INR'));
+        t('\nTemporary payment QR\n');
         b(ESC,0x61,0x01);
         b(ESC,0x45,0x01); t('Terms & Conditions\n'); b(ESC,0x45,0x00);
         t('Thank you for doing business with\nus.\n');
@@ -914,6 +950,7 @@ function playBeep() {
                 <div class="qty">x${escapeHtml(fmtQty(item.qty))}</div>
             </div>`).join('');
         const dt = formatBillDateParts(bill.time);
+        const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=' + encodeURIComponent('upi://pay?pa=panihari@upi&pn=Panihari Veg Restaurant&cu=INR');
 
         const w = window.open('', '_blank', 'width=430,height=900');
         if (!w) {
@@ -944,6 +981,7 @@ function playBeep() {
             .tax-head,.tax-row { display:grid; grid-template-columns:1fr 20mm 15mm; text-align:right; gap:1mm; }
             .tax-head span:first-child,.tax-row span:first-child { text-align:left; }
             .terms { margin-top:2mm; font-size:8.5px; }
+            .pay-qr { width:28mm; height:28mm; display:block; margin:1.5mm auto .5mm; }
         </style></head><body>
             <div class="center">
                 <img class="logo" src="${PANIHARI_LOGO_DATA_URI}" alt="Panihari logo">
@@ -961,6 +999,9 @@ function playBeep() {
             <div class="twocol"><span>Place of Supply:</span><span></span></div>
             <div class="twocol"><span>${escapeHtml(PANIHARI_INFO.placeOfSupply)}</span><span>Time: ${escapeHtml(dt.time)}</span></div>
             <div class="twocol"><span>Table: ${escapeHtml(bill.table)}</span><span>Invoice no: ${escapeHtml(bill.billNo)}</span></div>
+            ${bill.customer && bill.customer.name ? `<div><b>Party:</b> ${escapeHtml(bill.customer.name)}</div>` : ''}
+            ${bill.customer && bill.customer.phone ? `<div><b>Mobile:</b> ${escapeHtml(bill.customer.phone)}</div>` : ''}
+            ${bill.customer && bill.customer.gstin ? `<div><b>Party GSTIN:</b> ${escapeHtml(bill.customer.gstin)}</div>` : ''}
             <div class="dash"></div>
             <div class="item-head"><span>Item Name</span><span class="right">Price</span><span class="right">Amount</span></div>
             <b>Qty</b>
@@ -975,6 +1016,8 @@ function playBeep() {
             <div class="dash"></div>
             <div class="tax-row"><span>GST@5%</span><span>${fmtMoney(bill.subtotal)}</span><span>${fmtMoney(bill.gst)}</span></div>
             <div class="total-row" style="margin-top:1.5mm;font-weight:900"><span></span><span>Total Tax: ${fmtMoney(bill.gst)}</span></div>
+            <div class="dash"></div>
+            <div class="center"><b>SCAN TO PAY</b><img class="pay-qr" src="${qrUrl}" alt="Temporary payment QR"><span class="small">Temporary payment QR</span></div>
             <div class="dash"></div>
             <div class="center terms"><b>Terms &amp; Conditions</b><br>Thank you for doing business with<br>us.</div>
         </body></html>`);
@@ -1025,6 +1068,111 @@ function playBeep() {
             console.error('Print error:', err);
             alert('Direct print failed: ' + (err.message || err) + '\n\nSystem print dialog khol raha hoon.');
             printBillWithBrowser(bill);
+        }
+    }
+
+    async function printPartyBill(table) {
+        const customer = getCustomerDetails();
+        if (customer === null) return;
+        const bill = getTableBillData(table);
+        if (!bill) {
+            showToast('Is table ke liye order nahi mila');
+            return;
+        }
+        bill.customer = customer;
+
+        try {
+            if (printerMode === 'ble' && bluetoothCharacteristic) {
+                showToast('Bluetooth se party bill print ho raha hai...');
+                await writeBluetooth(await buildEscPosReceipt(bill));
+                await markBillPrinted(bill);
+                showToast('Party Bill Printed - TABLE ' + table);
+                return;
+            }
+            if (printerMode === 'serial' && serialWriter) {
+                showToast('COM printer se party bill print ho raha hai...');
+                await writeSerial(await buildEscPosReceipt(bill));
+                await markBillPrinted(bill);
+                showToast('Party Bill Printed - TABLE ' + table);
+                return;
+            }
+            if (printBillWithBrowser(bill)) showToast('Party Bill Print Dialog Opened');
+        } catch (err) {
+            console.error('Party bill print error:', err);
+            alert('Direct print failed: ' + (err.message || err) + '\n\nSystem print dialog khol raha hoon.');
+            printBillWithBrowser(bill);
+        }
+    }
+
+    function getKOTData(orderId) {
+        const order = allOrders[orderId];
+        if (!order) return null;
+        return {
+            orderId,
+            orderNo: order.orderNo || orderId.slice(-6).toUpperCase(),
+            table: order.table || '?',
+            items: order.items || [],
+            time: order.time || new Date().toISOString()
+        };
+    }
+
+    function buildEscPosKOT(kot) {
+        const ESC = 0x1B, GS = 0x1D;
+        const chunks = [];
+        const encoder = new TextEncoder();
+        const b = (...arr) => chunks.push(new Uint8Array(arr));
+        const t = str => chunks.push(encoder.encode(String(str)));
+        const line = '-'.repeat(RECEIPT_COLUMNS);
+        const dt = formatBillDateParts(kot.time);
+        b(ESC,0x40,ESC,0x61,0x01,ESC,0x45,0x01,GS,0x21,0x11);
+        t('K.O.T\n');
+        b(GS,0x21,0x00,ESC,0x45,0x00);
+        t(PANIHARI_INFO.name + '\n' + line + '\n');
+        b(ESC,0x61,0x00,ESC,0x45,0x01);
+        t(twoCol('TABLE: ' + kot.table, 'KOT: ' + kot.orderNo) + '\n');
+        b(ESC,0x45,0x00);
+        t(twoCol(dt.date, dt.time) + '\n' + line + '\n');
+        kot.items.forEach(item => {
+            b(ESC,0x45,0x01);
+            t('x' + fmtQty(item.qty || 1) + '  ' + String(item.name || 'Item') + '\n');
+            b(ESC,0x45,0x00);
+        });
+        t(line + '\n');
+        b(ESC,0x61,0x01,ESC,0x45,0x01); t('KITCHEN COPY\n\n\n');
+        b(ESC,0x45,0x00,GS,0x56,0x42,0x00);
+        const length = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
+        const out = new Uint8Array(length);
+        let offset = 0;
+        chunks.forEach(chunk => { out.set(chunk, offset); offset += chunk.length; });
+        return out;
+    }
+
+    function printKOTWithBrowser(kot) {
+        const dt = formatBillDateParts(kot.time);
+        const rows = kot.items.map(item => `<div class="item"><b>x${escapeHtml(fmtQty(item.qty || 1))}</b><span>${escapeHtml(item.name || 'Item')}</span></div>`).join('');
+        const w = window.open('', '_blank', 'width=430,height=700');
+        if (!w) { alert('Print window block ho gaya. Popup allow karke dobara PRINT K.O.T dabayein.'); return false; }
+        w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>KOT-${escapeHtml(kot.orderNo)}</title><style>
+            @page{size:58mm auto;margin:2mm}*{box-sizing:border-box}body{width:54mm;margin:0 auto;color:#000;font-family:"Courier New",monospace;font-size:12px}.center{text-align:center}.title{font-size:24px;font-weight:900}.dash{border-top:1px dashed #000;margin:2mm 0}.row{display:flex;justify-content:space-between;font-weight:800}.item{display:grid;grid-template-columns:10mm 1fr;gap:2mm;padding:2mm 0;border-bottom:1px dotted #777;font-size:14px}.copy{font-weight:900;margin-top:3mm}
+        </style></head><body><div class="center title">K.O.T</div><div class="center"><b>${escapeHtml(PANIHARI_INFO.name)}</b></div><div class="dash"></div><div class="row"><span>TABLE: ${escapeHtml(kot.table)}</span><span>KOT: ${escapeHtml(kot.orderNo)}</span></div><div class="row"><span>${escapeHtml(dt.date)}</span><span>${escapeHtml(dt.time)}</span></div><div class="dash"></div>${rows}<div class="dash"></div><div class="center copy">KITCHEN COPY</div></body></html>`);
+        w.document.close(); w.focus(); setTimeout(() => w.print(), 250); return true;
+    }
+
+    async function printKOT(orderId) {
+        const kot = getKOTData(orderId);
+        if (!kot) { showToast('Order nahi mila'); return; }
+        try {
+            if (printerMode === 'ble' && bluetoothCharacteristic) {
+                await writeBluetooth(buildEscPosKOT(kot)); showToast('K.O.T Printed - TABLE ' + kot.table); return;
+            }
+            if (printerMode === 'serial' && serialWriter) {
+                await writeSerial(buildEscPosKOT(kot)); showToast('K.O.T Printed - TABLE ' + kot.table); return;
+            }
+            if (printKOTWithBrowser(kot)) showToast('K.O.T Print Dialog Opened');
+        } catch (err) {
+            console.error('KOT print error:', err);
+            alert('Direct K.O.T print failed: ' + (err.message || err) + '\n\nSystem print dialog khol raha hoon.');
+            printKOTWithBrowser(kot);
         }
     }
 
