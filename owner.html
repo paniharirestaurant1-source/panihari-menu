@@ -182,6 +182,18 @@
             cursor: pointer; transition: all 0.2s ease; font-size: 1rem;
         }
         .sound-toggle:hover { background: rgba(212,175,55,0.1); border-color: var(--gold); }
+
+        .party-panel { background:rgba(255,255,255,.03); border:1px solid rgba(212,175,55,.22); border-radius:1.25rem; padding:1.25rem; }
+        .party-field { width:100%; background:#111; color:#fff; border:1px solid rgba(255,255,255,.12); border-radius:.65rem; padding:.7rem .8rem; outline:none; }
+        .party-field:focus { border-color:var(--gold); box-shadow:0 0 0 2px rgba(212,175,55,.1); }
+        .party-table-wrap { overflow-x:auto; border:1px solid rgba(255,255,255,.1); border-radius:.8rem; }
+        .party-entry-table { width:100%; min-width:720px; border-collapse:collapse; }
+        .party-entry-table th { background:rgba(212,175,55,.12); color:var(--gold); font-size:.72rem; letter-spacing:.08em; padding:.75rem .55rem; text-align:left; }
+        .party-entry-table td { border-top:1px solid rgba(255,255,255,.08); padding:.45rem; }
+        .party-entry-table input { width:100%; background:#0d0d0d; color:#fff; border:1px solid rgba(255,255,255,.1); border-radius:.45rem; padding:.55rem; outline:none; }
+        .party-entry-table input:focus { border-color:var(--gold); }
+        .party-entry-table .serial { width:42px; text-align:center; color:rgba(255,255,255,.45); }
+        .party-remove { width:34px; height:34px; border-radius:.5rem; background:rgba(230,57,70,.1); color:var(--red); border:1px solid rgba(230,57,70,.25); cursor:pointer; }
     </style>
 </head>
 <body>
@@ -249,7 +261,41 @@
             <button onclick="setFilter('new')" data-filter="new" class="filter-btn px-5 py-2 rounded-xl text-sm font-semibold tracking-wider transition-all" style="background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.5);">NEW</button>
             <button onclick="setFilter('preparing')" data-filter="preparing" class="filter-btn px-5 py-2 rounded-xl text-sm font-semibold tracking-wider transition-all" style="background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.5);">PREPARING</button>
             <button onclick="setFilter('done')" data-filter="done" class="filter-btn px-5 py-2 rounded-xl text-sm font-semibold tracking-wider transition-all" style="background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.5);">DONE</button>
+            <button onclick="openManualPartyBill()" id="partyBillTab" class="px-5 py-2 rounded-xl text-sm font-semibold tracking-wider transition-all" style="background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.5);"><i class="fas fa-file-invoice mr-1"></i> PARTY BILL</button>
         </div>
+
+        <!-- MANUAL PARTY BILL -->
+        <section id="manualPartyBillPanel" class="party-panel hidden mb-8">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-5">
+                <div>
+                    <h2 class="font-luxury text-xl" style="color:var(--gold)">CREATE PARTY BILL</h2>
+                    <p class="text-xs text-white/40 mt-1">Bill-book format me details bharein aur print karein.</p>
+                </div>
+                <div class="flex gap-2">
+                    <button class="printer-btn" onclick="resetManualPartyBill()"><i class="fas fa-rotate-left mr-1"></i> RESET</button>
+                    <button class="printer-btn" onclick="saveManualPartyBill()"><i class="fas fa-file-pdf mr-1"></i> SAVE PDF</button>
+                    <button class="btn-clear" onclick="printManualPartyBill()"><i class="fas fa-print mr-1"></i> PRINT BILL</button>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                <label class="text-xs text-white/50">BILL NO.<input id="partyBillNo" class="party-field mt-1" type="text"></label>
+                <label class="text-xs text-white/50">DATE<input id="partyBillDate" class="party-field mt-1" type="date"></label>
+            </div>
+            <div class="party-table-wrap">
+                <table class="party-entry-table">
+                    <thead><tr><th style="width:54px">S.NO</th><th>DESCRIPTION</th><th style="width:110px">QTY.</th><th style="width:130px">RATE</th><th style="width:140px">AMOUNT</th><th style="width:48px"></th></tr></thead>
+                    <tbody id="partyBillRows"></tbody>
+                </table>
+            </div>
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mt-4">
+                <button class="printer-btn" onclick="addPartyBillRow()"><i class="fas fa-plus mr-1"></i> ADD ROW</button>
+                <div class="grid grid-cols-3 gap-2 w-full md:w-auto">
+                    <label class="text-xs text-white/50">TOTAL<input id="partyTotal" class="party-field mt-1" type="number" step="0.01"></label>
+                    <label class="text-xs text-white/50">VAT %<input id="partyVatPercent" class="party-field mt-1" type="number" step="0.01" value="0"></label>
+                    <label class="text-xs text-white/50">GRAND TOTAL<input id="partyGrandTotal" class="party-field mt-1" type="number" step="0.01"></label>
+                </div>
+            </div>
+        </section>
 
         <!-- ORDERS LIST -->
         <div id="ordersList" class="space-y-3 pb-20"></div>
@@ -415,6 +461,11 @@ function playBeep() {
     // ===== FILTER =====
     function setFilter(f) {
         currentFilter = f;
+        document.getElementById('manualPartyBillPanel').classList.add('hidden');
+        document.getElementById('ordersList').classList.remove('hidden');
+        const partyTab = document.getElementById('partyBillTab');
+        partyTab.style.background = 'rgba(255,255,255,0.05)';
+        partyTab.style.color = 'rgba(255,255,255,0.5)';
         document.querySelectorAll('.filter-btn').forEach(btn => {
             if (btn.dataset.filter === f) {
                 btn.style.background = 'var(--gold)';
@@ -426,6 +477,162 @@ function playBeep() {
         });
         renderOrders();
     }
+
+    function openManualPartyBill() {
+        document.getElementById('ordersList').classList.add('hidden');
+        document.getElementById('manualPartyBillPanel').classList.remove('hidden');
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.style.background = 'rgba(255,255,255,0.05)';
+            btn.style.color = 'rgba(255,255,255,0.5)';
+        });
+        const partyTab = document.getElementById('partyBillTab');
+        partyTab.style.background = 'var(--gold)';
+        partyTab.style.color = '#000';
+        if (!document.querySelector('#partyBillRows tr')) resetManualPartyBill();
+    }
+
+    function nextManualBillNo() {
+        return String(Date.now()).slice(-6);
+    }
+
+    function addPartyBillRow(values = {}) {
+        const body = document.getElementById('partyBillRows');
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td class="serial"></td>
+            <td><input class="party-desc" type="text" value="${escapeHtml(values.description || '')}" placeholder="Description"></td>
+            <td><input class="party-qty" type="number" step="0.01" value="${escapeHtml(values.qty || '')}" placeholder="Qty"></td>
+            <td><input class="party-rate" type="number" step="0.01" value="${escapeHtml(values.rate || '')}" placeholder="Rate"></td>
+            <td><input class="party-amount" type="number" step="0.01" value="${escapeHtml(values.amount || '')}" placeholder="Amount"></td>
+            <td><button class="party-remove" type="button" title="Remove row"><i class="fas fa-xmark"></i></button></td>`;
+        body.appendChild(tr);
+        tr.querySelector('.party-remove').addEventListener('click', () => {
+            tr.remove(); renumberPartyRows(); calculateManualPartyTotals();
+        });
+        ['.party-qty', '.party-rate'].forEach(selector => tr.querySelector(selector).addEventListener('input', () => {
+            const qty = Number(tr.querySelector('.party-qty').value || 0);
+            const rate = Number(tr.querySelector('.party-rate').value || 0);
+            if (tr.querySelector('.party-qty').value !== '' && tr.querySelector('.party-rate').value !== '') {
+                tr.querySelector('.party-amount').value = (qty * rate).toFixed(2);
+            }
+            calculateManualPartyTotals();
+        }));
+        tr.querySelector('.party-amount').addEventListener('input', calculateManualPartyTotals);
+        renumberPartyRows();
+    }
+
+    function renumberPartyRows() {
+        document.querySelectorAll('#partyBillRows tr').forEach((tr, index) => tr.querySelector('.serial').textContent = index + 1);
+    }
+
+    function calculateManualPartyTotals() {
+        const total = Array.from(document.querySelectorAll('#partyBillRows .party-amount'))
+            .reduce((sum, input) => sum + Number(input.value || 0), 0);
+        const vat = Number(document.getElementById('partyVatPercent').value || 0);
+        document.getElementById('partyTotal').value = total.toFixed(2);
+        document.getElementById('partyGrandTotal').value = (total + total * vat / 100).toFixed(2);
+    }
+
+    function updateGrandTotalFromFields() {
+        const total = Number(document.getElementById('partyTotal').value || 0);
+        const vat = Number(document.getElementById('partyVatPercent').value || 0);
+        document.getElementById('partyGrandTotal').value = (total + total * vat / 100).toFixed(2);
+    }
+
+    function resetManualPartyBill() {
+        document.getElementById('partyBillNo').value = nextManualBillNo();
+        document.getElementById('partyBillDate').value = new Date().toISOString().slice(0, 10);
+        document.getElementById('partyVatPercent').value = '0';
+        document.getElementById('partyBillRows').innerHTML = '';
+        for (let i = 0; i < 8; i++) addPartyBillRow();
+        calculateManualPartyTotals();
+    }
+
+    function getManualPartyBillData() {
+        const items = Array.from(document.querySelectorAll('#partyBillRows tr')).map((tr, index) => ({
+            serial: index + 1,
+            description: tr.querySelector('.party-desc').value.trim(),
+            qty: tr.querySelector('.party-qty').value,
+            rate: tr.querySelector('.party-rate').value,
+            amount: tr.querySelector('.party-amount').value
+        })).filter(item => item.description || item.qty || item.rate || item.amount);
+        return {
+            billNo: document.getElementById('partyBillNo').value.trim(),
+            date: document.getElementById('partyBillDate').value,
+            items,
+            total: document.getElementById('partyTotal').value,
+            vatPercent: document.getElementById('partyVatPercent').value,
+            grandTotal: document.getElementById('partyGrandTotal').value
+        };
+    }
+
+    function printManualPartyBill() {
+        outputManualPartyBill('print');
+    }
+
+    function saveManualPartyBill() {
+        outputManualPartyBill('save');
+    }
+
+    function outputManualPartyBill(mode) {
+        const bill = getManualPartyBillData();
+        if (!bill.items.length) { alert('Kam se kam ek bill item bharein.'); return; }
+        const rows = bill.items.map(item => `<tr><td>${item.serial}</td><td class="desc">${escapeHtml(item.description)}</td><td>${escapeHtml(item.qty)}</td><td>${escapeHtml(item.rate)}</td><td>${escapeHtml(item.amount)}</td></tr>`).join('');
+        const blankRows = Array.from({length: Math.max(0, 12 - bill.items.length)}, () => '<tr class="blank"><td></td><td></td><td></td><td></td><td></td></tr>').join('');
+        const displayDate = bill.date ? new Date(bill.date + 'T00:00:00').toLocaleDateString('en-GB') : '';
+        const w = window.open('', '_blank', 'width=850,height=1000');
+        if (!w) { alert('Print window block ho gaya. Popup allow karke dobara PRINT BILL dabayein.'); return; }
+        w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Party Bill ${escapeHtml(bill.billNo)}</title>${mode === 'save' ? '<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>' : ''}<style>
+            @page{size:A4 portrait;margin:10mm}*{box-sizing:border-box}body{margin:0;color:#111;background:#fff;font-family:Arial,sans-serif}.sheet{width:190mm;min-height:267mm;margin:auto;border:1.5px solid #222;padding:7mm;position:relative}.topline{display:flex;justify-content:space-between;align-items:flex-start;font-size:12px;font-weight:700}.brand{text-align:center;margin-top:-3mm}.brand img{width:86mm;max-height:46mm;object-fit:contain;filter:grayscale(1)}.bill-book{font-size:12px;font-weight:700;margin-bottom:-2mm}.address{text-align:center;font-size:13px;font-weight:700;margin-top:1mm}.events{text-align:center;border:1px solid #444;border-radius:8px;padding:2mm;margin:2mm 10mm;font-size:12px;font-weight:700}.meta{display:grid;grid-template-columns:1fr 55mm;gap:5mm;font-size:13px;margin:4mm 0}.line{border-bottom:1px solid #222;min-height:7mm;padding:1mm 2mm}.billtable{width:100%;border-collapse:collapse;table-layout:fixed}.billtable th,.billtable td{border:1px solid #222;padding:2mm;text-align:center;font-size:12px}.billtable th{height:12mm;font-size:13px}.billtable th:nth-child(1){width:14mm}.billtable th:nth-child(2){width:auto}.billtable th:nth-child(3){width:24mm}.billtable th:nth-child(4){width:28mm}.billtable th:nth-child(5){width:34mm}.billtable td.desc{text-align:left}.billtable tr:not(.blank) td{height:10mm}.billtable tr.blank td{height:12mm}.summary{width:95mm;margin-left:auto;border-collapse:collapse;margin-top:-1px}.summary td{border:1px solid #222;padding:2mm;font-size:13px;font-weight:700}.summary td:last-child{text-align:right;width:42mm}.payment{display:flex;align-items:center;justify-content:space-between;gap:8mm;margin-top:5mm}.payment-qr{display:flex;align-items:center;gap:3mm}.qr-crop{width:34mm;height:34mm;overflow:hidden;position:relative;background:#fff}.qr-crop img{position:absolute;width:65.3mm;height:auto;left:-15.7mm;top:-39.3mm}.paytext{font-size:11px;line-height:1.4}.footer{display:flex;justify-content:space-between;align-items:flex-end;margin-top:7mm;font-size:12px}.signature{text-align:center;min-width:42mm;border-top:1px solid #222;padding-top:1mm;font-weight:700}@media print{body{print-color-adjust:exact;-webkit-print-color-adjust:exact}.sheet{border:1.5px solid #222}}
+        </style></head><body><div class="sheet">
+            <div class="topline"><span>GST IN : ${escapeHtml(PANIHARI_INFO.gstin)}</span><span class="bill-book">Bill Book</span><span>Ph. Prakash<br>9829110931</span></div>
+            <div class="brand"><img src="panihari-logo-original.png" alt="Panihari Restaurant"></div>
+            <div class="address">Add.: Opp. 132, KV-GSS, Purana Ghat, Power House, Goner Road, Jaipur</div>
+            <div class="events">Kitty Parties, Birthday Parties, Romantic Dinners,<br>Get Together, Business Lunches, &amp; All Parties Celebrate Here.</div>
+            <div class="meta"><div><b>BILL No.</b><div class="line">${escapeHtml(bill.billNo)}</div></div><div><b>Date</b><div class="line">${escapeHtml(displayDate)}</div></div></div>
+            <div class="meta" style="grid-template-columns:1fr"><div><b>M/s</b><div class="line"></div><div class="line"></div></div></div>
+            <table class="billtable"><thead><tr><th>S.No</th><th>DESCRIPTION</th><th>QTY.</th><th>RATE</th><th>AMOUNT</th></tr></thead><tbody>${rows}${blankRows}</tbody></table>
+            <table class="summary"><tr><td>TOTAL</td><td>${escapeHtml(bill.total)}</td></tr><tr><td>VAT % (${escapeHtml(bill.vatPercent || '0')}%)</td><td>${fmtMoney(Number(bill.total || 0) * Number(bill.vatPercent || 0) / 100)}</td></tr><tr><td>GRAND TOTAL</td><td>${escapeHtml(bill.grandTotal)}</td></tr></table>
+            <div class="payment"><div class="payment-qr"><div class="qr-crop"><img src="panihari-payment-qr.jpeg" alt="Prakash Saini payment QR"></div><div class="paytext"><b>SCAN TO PAY</b><br>Prakash Saini<br>9829110931@airtel</div></div><div class="signature">For: Panihari Restaurant</div></div>
+            <div class="footer"><span><b>Note:</b> 50% Advance 50% Deposited Same Day 7 p.m. on Booking Day.</span></div>
+        </div></body></html>`);
+        w.document.close();
+        w.focus();
+        if (mode === 'print') {
+            setTimeout(() => w.print(), 650);
+            return;
+        }
+
+        let attempts = 0;
+        const saveWhenReady = () => {
+            attempts++;
+            if (w.closed) return;
+            if (w.html2pdf && w.document.querySelector('.sheet')) {
+                const safeNo = String(bill.billNo || 'Party-Bill').replace(/[^a-zA-Z0-9_-]+/g, '-');
+                w.html2pdf().set({
+                    margin: 0,
+                    filename: 'Panihari-Party-Bill-' + safeNo + '.pdf',
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                    pagebreak: { mode: ['avoid-all'] }
+                }).from(w.document.querySelector('.sheet')).save().then(() => {
+                    showToast('Party Bill PDF Saved');
+                    setTimeout(() => { if (!w.closed) w.close(); }, 400);
+                }).catch(err => {
+                    console.error('Party bill PDF save error:', err);
+                    alert('PDF save nahi hua. Internet connection check karke dobara SAVE PDF dabayein.');
+                });
+                return;
+            }
+            if (attempts < 30) setTimeout(saveWhenReady, 250);
+            else alert('PDF saver load nahi hua. Internet connection check karke dobara SAVE PDF dabayein.');
+        };
+        setTimeout(saveWhenReady, 500);
+    }
+
+    document.getElementById('partyVatPercent').addEventListener('input', updateGrandTotalFromFields);
+    document.getElementById('partyTotal').addEventListener('input', updateGrandTotalFromFields);
 
     // ===== TOAST =====
     function showToast(msg) {
@@ -547,7 +754,7 @@ function playBeep() {
                             ${isNew ? `<button class="btn-preparing w-full" onclick="markPreparing('${id}')"><i class="fas fa-fire-burner mr-1"></i> START</button>` : ''}
                             ${!isDone ? `<button class="btn-complete w-full" onclick="markDone('${id}')"><i class="fas fa-check mr-1"></i> COMPLETE</button>` : ''}
                             <button class="btn-print w-full" onclick="printKOT('${id}')"><i class="fas fa-kitchen-set mr-1"></i> PRINT K.O.T</button>
-                            <button class="btn-print w-full ${billRequested ? 'bill-requested' : ''}" onclick="printPartyBill('${order.table || ''}')"><i class="fas fa-receipt mr-1"></i> ${billRequested ? 'PARTY BILL • REQUESTED' : 'PRINT PARTY BILL'}</button>
+                            <button class="btn-print w-full ${billRequested ? 'bill-requested' : ''}" onclick="printTableBill('${order.table || ''}')"><i class="fas fa-receipt mr-1"></i> ${billRequested ? 'PRINT BILL • REQUESTED' : 'PRINT BILL'}</button>
                             <button class="btn-delete w-full" onclick="deleteSingleOrder('${id}')"><i class="fas fa-trash mr-1"></i> DELETE</button>
                         </div>
                     </div>
@@ -893,8 +1100,8 @@ function playBeep() {
         t(line + '\n');
         b(ESC,0x61,0x01);
         t('SCAN TO PAY\n');
-        chunks.push(escPosQrCommands('upi://pay?pa=panihari@upi&pn=Panihari%20Veg%20Restaurant&cu=INR'));
-        t('\nTemporary payment QR\n');
+        chunks.push(escPosQrCommands('upi://pay?pa=9829110931@airtel&pn=Prakash%20Saini&cu=INR'));
+        t('\nPrakash Saini\n9829110931@airtel\n');
         b(ESC,0x61,0x01);
         b(ESC,0x45,0x01); t('Terms & Conditions\n'); b(ESC,0x45,0x00);
         t('Thank you for doing business with\nus.\n');
@@ -947,7 +1154,6 @@ function playBeep() {
                 <div class="qty">x${escapeHtml(fmtQty(item.qty))}</div>
             </div>`).join('');
         const dt = formatBillDateParts(bill.time);
-        const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=' + encodeURIComponent('upi://pay?pa=panihari@upi&pn=Panihari Veg Restaurant&cu=INR');
 
         const w = window.open('', '_blank', 'width=430,height=900');
         if (!w) {
@@ -978,7 +1184,8 @@ function playBeep() {
             .tax-head,.tax-row { display:grid; grid-template-columns:1fr 20mm 15mm; text-align:right; gap:1mm; }
             .tax-head span:first-child,.tax-row span:first-child { text-align:left; }
             .terms { margin-top:2mm; font-size:8.5px; }
-            .pay-qr { width:28mm; height:28mm; display:block; margin:1.5mm auto .5mm; }
+            .pay-qr-crop { width:28mm; height:28mm; overflow:hidden; position:relative; margin:1.5mm auto .5mm; background:#fff; }
+            .pay-qr-crop img { position:absolute; width:53.8mm; height:auto; left:-12.9mm; top:-32.4mm; }
         </style></head><body>
             <div class="center">
                 <img class="logo" src="panihari-logo-original.png" alt="Panihari Veg. Restaurant logo">
@@ -1013,7 +1220,7 @@ function playBeep() {
             <div class="tax-row"><span>GST@5%</span><span>${fmtMoney(bill.subtotal)}</span><span>${fmtMoney(bill.gst)}</span></div>
             <div class="total-row" style="margin-top:1.5mm;font-weight:900"><span></span><span>Total Tax: ${fmtMoney(bill.gst)}</span></div>
             <div class="dash"></div>
-            <div class="center"><b>SCAN TO PAY</b><img class="pay-qr" src="${qrUrl}" alt="Temporary payment QR"><span class="small">Temporary payment QR</span></div>
+            <div class="center"><b>SCAN TO PAY</b><div class="pay-qr-crop"><img src="panihari-payment-qr.jpeg" alt="Prakash Saini payment QR"></div><span class="small">Prakash Saini · 9829110931@airtel</span></div>
             <div class="dash"></div>
             <div class="center terms"><b>Terms &amp; Conditions</b><br>Thank you for doing business with<br>us.</div>
         </body></html>`);
