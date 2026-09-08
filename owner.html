@@ -274,7 +274,8 @@
                 <div class="flex gap-2">
                     <button class="printer-btn" onclick="resetManualPartyBill()"><i class="fas fa-rotate-left mr-1"></i> RESET</button>
                     <button class="printer-btn" onclick="saveManualPartyBill()"><i class="fas fa-file-pdf mr-1"></i> SAVE PDF</button>
-                    <button class="btn-clear" onclick="printManualPartyBill()"><i class="fas fa-print mr-1"></i> PRINT BILL</button>
+                    <button class="printer-btn" onclick="printManualPartyKOT()"><i class="fas fa-kitchen-set mr-1"></i> PRINT PARTY K.O.T</button>
+                    <button class="btn-clear" onclick="printManualPartyBill()"><i class="fas fa-print mr-1"></i> PRINT PARTY BILL</button>
                 </div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
@@ -291,7 +292,7 @@
                 <button class="printer-btn" onclick="addPartyBillRow()"><i class="fas fa-plus mr-1"></i> ADD ROW</button>
                 <div class="grid grid-cols-3 gap-2 w-full md:w-auto">
                     <label class="text-xs text-white/50">TOTAL<input id="partyTotal" class="party-field mt-1" type="number" step="0.01"></label>
-                    <label class="text-xs text-white/50">VAT %<input id="partyVatPercent" class="party-field mt-1" type="number" step="0.01" value="0"></label>
+                    <label class="text-xs text-white/50">GST %<input id="partyVatPercent" class="party-field mt-1" type="number" step="0.01" value="5" readonly></label>
                     <label class="text-xs text-white/50">GRAND TOTAL<input id="partyGrandTotal" class="party-field mt-1" type="number" step="0.01"></label>
                 </div>
             </div>
@@ -542,7 +543,7 @@ function playBeep() {
     function resetManualPartyBill() {
         document.getElementById('partyBillNo').value = nextManualBillNo();
         document.getElementById('partyBillDate').value = new Date().toISOString().slice(0, 10);
-        document.getElementById('partyVatPercent').value = '0';
+        document.getElementById('partyVatPercent').value = '5';
         document.getElementById('partyBillRows').innerHTML = '';
         for (let i = 0; i < 8; i++) addPartyBillRow();
         calculateManualPartyTotals();
@@ -566,12 +567,129 @@ function playBeep() {
         };
     }
 
-    function printManualPartyBill() {
-        outputManualPartyBill('print');
+    async function printManualPartyBill() {
+        const bill = getManualThermalBill();
+        if (!bill) return;
+        try {
+            if (printerMode === 'ble' && bluetoothCharacteristic) {
+                await writeBluetooth(await buildEscPosReceipt(bill));
+                showToast('Party Bill Printed');
+                return;
+            }
+            if (printerMode === 'serial' && serialWriter) {
+                await writeSerial(await buildEscPosReceipt(bill));
+                showToast('Party Bill Printed');
+                return;
+            }
+            if (printBillWithBrowser(bill)) showToast('Party Bill Print Dialog Opened');
+        } catch (err) {
+            console.error('Party bill print error:', err);
+            alert('Direct print failed. System print dialog khol raha hoon.');
+            printBillWithBrowser(bill);
+        }
     }
 
     function saveManualPartyBill() {
-        outputManualPartyBill('save');
+        saveManualThermalBillPdf();
+    }
+
+    function getManualThermalBill() {
+        const manual = getManualPartyBillData();
+        if (!manual.items.length) { alert('Kam se kam ek party item bharein.'); return null; }
+        const subtotal = money(manual.total);
+        const gst = money(subtotal * 0.05);
+        return {
+            billNo: manual.billNo || nextManualBillNo(),
+            table: 'PARTY',
+            orderCount: 1,
+            orderIds: [],
+            items: manual.items.map(item => ({
+                name: item.description || 'Party Item',
+                qty: money(item.qty || 1) || 1,
+                price: money(item.rate),
+                sub: money(item.amount)
+            })),
+            subtotal,
+            gst,
+            total: money(subtotal + gst),
+            time: manual.date ? new Date(manual.date + 'T12:00:00').toISOString() : new Date().toISOString()
+        };
+    }
+
+    async function buildEscPosPartyKOT(bill) {
+        const ESC = 0x1B, GS = 0x1D;
+        const chunks = [];
+        const encoder = new TextEncoder();
+        const b = (...arr) => chunks.push(new Uint8Array(arr));
+        const t = str => chunks.push(encoder.encode(String(str)));
+        const line = '-'.repeat(RECEIPT_COLUMNS);
+        const dt = formatBillDateParts(bill.time);
+        b(ESC,0x40,ESC,0x61,0x01);
+        const logo = await getEscPosLogoRaster();
+        if (logo.length) { chunks.push(logo); t('\n'); }
+        b(ESC,0x45,0x01,GS,0x21,0x11); t('PARTY K.O.T\n');
+        b(GS,0x21,0x00,ESC,0x45,0x00); t(PANIHARI_INFO.name + '\n' + line + '\n');
+        b(ESC,0x61,0x00); t(twoCol('KOT: ' + bill.billNo, dt.date) + '\n'); t(twoCol('PARTY ORDER', dt.time) + '\n' + line + '\n');
+        bill.items.forEach((item, index) => {
+            b(ESC,0x45,0x01); t((index + 1) + '. x' + fmtQty(item.qty) + ' ' + item.name + '\n'); b(ESC,0x45,0x00);
+            t(twoCol('Rate ' + fmtMoney(item.price), 'Amt ' + fmtMoney(item.sub)) + '\n');
+        });
+        t(line + '\n');
+        t(twoCol('Subtotal', fmtMoney(bill.subtotal)) + '\n');
+        t(twoCol('GST 5%', fmtMoney(bill.gst)) + '\n');
+        b(ESC,0x45,0x01); t(twoCol('Grand Total', fmtMoney(bill.total)) + '\n'); b(ESC,0x45,0x00);
+        t(line + '\n'); b(ESC,0x61,0x01,ESC,0x45,0x01); t('KITCHEN / PARTY COPY\n\n\n');
+        b(ESC,0x45,0x00,GS,0x56,0x42,0x00);
+        const length = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
+        const out = new Uint8Array(length); let offset = 0;
+        chunks.forEach(chunk => { out.set(chunk, offset); offset += chunk.length; });
+        return out;
+    }
+
+    function printManualPartyKOTBrowser(bill) {
+        const dt = formatBillDateParts(bill.time);
+        const rows = bill.items.map((item, index) => `<div class="item"><b>${index + 1}. x${escapeHtml(fmtQty(item.qty))} ${escapeHtml(item.name)}</b><div>Rate ${fmtMoney(item.price)} &nbsp; Amount ${fmtMoney(item.sub)}</div></div>`).join('');
+        const w = window.open('', '_blank', 'width=430,height=850');
+        if (!w) { alert('Popup allow karke dobara PRINT PARTY K.O.T dabayein.'); return false; }
+        w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Party KOT ${escapeHtml(bill.billNo)}</title><style>@page{size:58mm auto;margin:1.5mm}*{box-sizing:border-box}body{width:55mm;margin:0 auto;color:#000;font-family:"Courier New",monospace;font-size:9.5px;font-weight:600}.center{text-align:center}.logo{width:34mm;max-height:35mm;object-fit:contain;filter:grayscale(1)}.title{font-size:17px;font-weight:900}.dash{border-top:1px dashed #000;margin:1.5mm 0}.row{display:flex;justify-content:space-between}.item{padding:1.2mm 0;border-bottom:1px dotted #555}.total{font-weight:900;font-size:11px}</style></head><body><div class="center"><img class="logo" src="panihari-logo-original.png"><div class="title">PARTY K.O.T</div><div>${escapeHtml(PANIHARI_INFO.name)}</div></div><div class="dash"></div><div class="row"><span>KOT: ${escapeHtml(bill.billNo)}</span><span>${escapeHtml(dt.date)}</span></div><div class="row"><span>PARTY ORDER</span><span>${escapeHtml(dt.time)}</span></div><div class="dash"></div>${rows}<div class="dash"></div><div class="row"><span>Subtotal</span><span>${fmtMoney(bill.subtotal)}</span></div><div class="row"><span>GST 5%</span><span>${fmtMoney(bill.gst)}</span></div><div class="row total"><span>Grand Total</span><span>${fmtMoney(bill.total)}</span></div><div class="dash"></div><div class="center"><b>KITCHEN / PARTY COPY</b></div></body></html>`);
+        w.document.close(); w.focus(); setTimeout(() => w.print(), 500); return true;
+    }
+
+    async function printManualPartyKOT() {
+        const bill = getManualThermalBill();
+        if (!bill) return;
+        try {
+            if (printerMode === 'ble' && bluetoothCharacteristic) { await writeBluetooth(await buildEscPosPartyKOT(bill)); showToast('Party K.O.T Printed'); return; }
+            if (printerMode === 'serial' && serialWriter) { await writeSerial(await buildEscPosPartyKOT(bill)); showToast('Party K.O.T Printed'); return; }
+            if (printManualPartyKOTBrowser(bill)) showToast('Party K.O.T Print Dialog Opened');
+        } catch (err) {
+            console.error('Party KOT print error:', err);
+            alert('Direct K.O.T print failed. System print dialog khol raha hoon.');
+            printManualPartyKOTBrowser(bill);
+        }
+    }
+
+    function saveManualThermalBillPdf() {
+        const bill = getManualThermalBill();
+        if (!bill) return;
+        const dt = formatBillDateParts(bill.time);
+        const rows = bill.items.map(item => `<div class="item"><div class="item-main"><span>${escapeHtml(item.name)}</span><span>${fmtMoney(item.price)}</span><span>${fmtMoney(item.sub)}</span></div><div>x${escapeHtml(fmtQty(item.qty))}</div></div>`).join('');
+        const pageHeight = Math.max(190, 155 + bill.items.length * 11);
+        const w = window.open('', '_blank', 'width=430,height=900');
+        if (!w) { alert('Popup allow karke dobara SAVE PDF dabayein.'); return; }
+        w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Party Bill ${escapeHtml(bill.billNo)}</title><script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script><style>*{box-sizing:border-box}body{margin:0;background:#fff;color:#000;font-family:"Courier New",monospace}.receipt{width:55mm;padding:1.5mm;font-size:9.5px;font-weight:600}.center{text-align:center}.logo{width:34mm;max-height:35mm;object-fit:contain;filter:grayscale(1)}.title{font-size:12px;font-weight:900}.dash{border-top:1px dashed #000;margin:1.5mm 0}.row{display:flex;justify-content:space-between}.item{padding:.7mm 0}.item-main{display:grid;grid-template-columns:1fr 12mm 14mm;gap:1mm}.item-main span:nth-child(2),.item-main span:nth-child(3){text-align:right}.grand{font-size:11px;font-weight:900}.qr{width:28mm;height:28mm;overflow:hidden;position:relative;margin:1mm auto}.qr img{position:absolute;width:53.8mm;left:-12.9mm;top:-32.4mm}</style></head><body><div class="receipt"><div class="center"><img class="logo" src="panihari-logo-original.png"><div class="title">PARTY TAX INVOICE</div><div>${escapeHtml(PANIHARI_INFO.name)}</div><div>${escapeHtml(PANIHARI_INFO.address1)}, ${escapeHtml(PANIHARI_INFO.address2)}</div><div>GSTIN: ${escapeHtml(PANIHARI_INFO.gstin)}</div></div><div class="dash"></div><div class="row"><span>Bill: ${escapeHtml(bill.billNo)}</span><span>${escapeHtml(dt.date)}</span></div><div class="row"><span>PARTY</span><span>${escapeHtml(dt.time)}</span></div><div class="dash"></div><div class="item-main"><b>Description</b><b>Rate</b><b>Amount</b></div>${rows}<div class="dash"></div><div class="row"><span>Subtotal</span><span>${fmtMoney(bill.subtotal)}</span></div><div class="row"><span>GST 5%</span><span>${fmtMoney(bill.gst)}</span></div><div class="row grand"><span>Grand Total</span><span>${fmtMoney(bill.total)}</span></div><div class="dash"></div><div class="center"><b>SCAN TO PAY</b><div class="qr"><img src="panihari-payment-qr.jpeg"></div><div>Prakash Saini<br>9829110931@airtel</div></div><div class="dash"></div><div class="center">Thank you!</div></div></body></html>`);
+        w.document.close(); w.focus();
+        let attempts = 0;
+        const save = () => {
+            attempts++;
+            if (w.closed) return;
+            if (w.html2pdf) {
+                const safeNo = String(bill.billNo).replace(/[^a-zA-Z0-9_-]+/g, '-');
+                w.html2pdf().set({margin:0,filename:'Panihari-Party-Bill-'+safeNo+'.pdf',image:{type:'jpeg',quality:.98},html2canvas:{scale:2,useCORS:true,backgroundColor:'#fff'},jsPDF:{unit:'mm',format:[58,pageHeight],orientation:'portrait'}}).from(w.document.querySelector('.receipt')).save().then(()=>{ showToast('58mm Party Bill PDF Saved'); setTimeout(()=>{if(!w.closed)w.close();},400); });
+            } else if (attempts < 30) setTimeout(save,250);
+            else alert('PDF saver load nahi hua. Internet check karke dobara try karein.');
+        };
+        setTimeout(save,500);
     }
 
     function outputManualPartyBill(mode) {
