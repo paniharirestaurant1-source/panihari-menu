@@ -872,7 +872,7 @@ function playBeep() {
                             ${isNew ? `<button class="btn-preparing w-full" onclick="markPreparing('${id}')"><i class="fas fa-fire-burner mr-1"></i> START</button>` : ''}
                             ${!isDone ? `<button class="btn-complete w-full" onclick="markDone('${id}')"><i class="fas fa-check mr-1"></i> COMPLETE</button>` : ''}
                             <button class="btn-print w-full" onclick="printKOT('${id}')"><i class="fas fa-kitchen-set mr-1"></i> PRINT K.O.T</button>
-                            <button class="btn-print w-full ${billRequested ? 'bill-requested' : ''}" onclick="printTableBill('${order.table || ''}')"><i class="fas fa-receipt mr-1"></i> ${billRequested ? 'PRINT BILL • REQUESTED' : 'PRINT BILL'}</button>
+                            <button class="btn-print w-full ${billRequested ? 'bill-requested' : ''}" onclick="printOrderBill('${id}')"><i class="fas fa-receipt mr-1"></i> ${billRequested ? 'PRINT BILL • REQUESTED' : 'PRINT BILL'}</button>
                             <button class="btn-delete w-full" onclick="deleteSingleOrder('${id}')"><i class="fas fa-trash mr-1"></i> DELETE</button>
                         </div>
                     </div>
@@ -1043,6 +1043,40 @@ function playBeep() {
             gst,
             total,
             time: lastOrder.time || firstOrder.time || new Date().toISOString()
+        };
+    }
+
+    function getOrderBillData(orderId) {
+        const order = allOrders[orderId];
+        if (!order) return null;
+
+        const items = (order.items || []).map(item => {
+            const price = money(item.price);
+            const qty = money(item.qty || 1) || 1;
+            return {
+                name: String(item.name || 'Item'),
+                price,
+                qty,
+                sub: money(item.sub || (price * qty))
+            };
+        });
+        let subtotal = money(order.subtotal);
+        if (!subtotal) subtotal = items.reduce((sum, item) => sum + item.sub, 0);
+        let gst = money(order.gst);
+        if (!gst) gst = money(subtotal * 0.05);
+        let total = money(order.total);
+        if (!total) total = money(subtotal + gst);
+
+        return {
+            billNo: order.orderNo || ('B' + String(order.table || '').replace(/[^0-9A-Za-z]/g, '') + '-' + String(orderId).slice(-6).toUpperCase()),
+            table: order.table || '?',
+            orderCount: 1,
+            orderIds: [orderId],
+            items,
+            subtotal,
+            gst,
+            total,
+            time: order.time || new Date().toISOString()
         };
     }
 
@@ -1356,6 +1390,36 @@ function playBeep() {
         try { await db.ref().update(updates); } catch (e) { console.warn('billPrintedAt update failed', e); }
         billRequestedTables.delete(bill.table);
         renderOrders();
+    }
+
+    async function printOrderBill(orderId) {
+        const bill = getOrderBillData(orderId);
+        if (!bill) {
+            showToast('Yeh order nahi mila');
+            return;
+        }
+
+        try {
+            if (printerMode === 'ble' && bluetoothCharacteristic) {
+                showToast('Bluetooth se order bill print ho raha hai...');
+                await writeBluetooth(await buildEscPosReceipt(bill));
+                await markBillPrinted(bill);
+                showToast('Order Bill Printed');
+                return;
+            }
+            if (printerMode === 'serial' && serialWriter) {
+                showToast('COM printer se order bill print ho raha hai...');
+                await writeSerial(await buildEscPosReceipt(bill));
+                await markBillPrinted(bill);
+                showToast('Order Bill Printed');
+                return;
+            }
+            if (printBillWithBrowser(bill)) showToast('Order Bill Print Dialog Opened');
+        } catch (err) {
+            console.error('Order bill print error:', err);
+            alert('Direct print failed: ' + (err.message || err) + '\n\nSystem print dialog khol raha hoon.');
+            printBillWithBrowser(bill);
+        }
     }
 
     async function printTableBill(table) {
