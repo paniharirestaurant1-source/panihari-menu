@@ -1118,6 +1118,28 @@ function playBeep() {
         return { name: name.trim(), phone: phone.trim() };
     }
 
+    function getOrderBillingDetails() {
+        const name = prompt('Customer Name:', '');
+        if (name === null) return null;
+        if (!name.trim()) { alert('Customer name bharna zaroori hai.'); return null; }
+
+        const phone = prompt('Customer Mobile Number:', '');
+        if (phone === null) return null;
+        if (!phone.trim()) { alert('Customer mobile number bharna zaroori hai.'); return null; }
+
+        const paymentInput = prompt('Payment Method type karein: Cash ya Online', 'Cash');
+        if (paymentInput === null) return null;
+        const normalized = paymentInput.trim().toLowerCase();
+        if (normalized !== 'cash' && normalized !== 'online') {
+            alert('Payment method sirf Cash ya Online ho sakta hai.');
+            return null;
+        }
+        return {
+            customer: { name: name.trim(), phone: phone.trim() },
+            paymentMethod: normalized === 'online' ? 'Online' : 'Cash'
+        };
+    }
+
     function escPosQrCommands(value) {
         const encoder = new TextEncoder();
         const data = encoder.encode(String(value));
@@ -1210,7 +1232,7 @@ function playBeep() {
         b(ESC,0x45,0x01); t('Tax Invoice\n'); b(ESC,0x45,0x00);
         b(ESC,0x61,0x00);
 
-        t(twoCol('Cash', 'Date: ' + dt.date) + '\n');
+        t(twoCol(bill.paymentMethod ? ('Payment: ' + bill.paymentMethod) : 'Cash', 'Date: ' + dt.date) + '\n');
         t(twoCol('Place of Supply:', '') + '\n');
         t(twoCol(PANIHARI_INFO.placeOfSupply, 'Time: ' + dt.time) + '\n');
         t(twoCol('Table: ' + bill.table, 'Invoice: ' + bill.billNo) + '\n');
@@ -1351,7 +1373,7 @@ function playBeep() {
             </div>
             <div class="dash"></div>
             <div class="center title">Tax Invoice</div>
-            <div class="twocol"><b>Cash</b><span>Date: ${escapeHtml(dt.date)}</span></div>
+            <div class="twocol"><b>${bill.paymentMethod ? ('Payment: ' + escapeHtml(bill.paymentMethod)) : 'Cash'}</b><span>Date: ${escapeHtml(dt.date)}</span></div>
             <div class="twocol"><span>Place of Supply:</span><span></span></div>
             <div class="twocol"><span>${escapeHtml(PANIHARI_INFO.placeOfSupply)}</span><span>Time: ${escapeHtml(dt.time)}</span></div>
             <div class="twocol"><span>Table: ${escapeHtml(bill.table)}</span><span>Invoice no: ${escapeHtml(bill.billNo)}</span></div>
@@ -1398,6 +1420,10 @@ function playBeep() {
             showToast('Yeh order nahi mila');
             return;
         }
+        const billingDetails = getOrderBillingDetails();
+        if (!billingDetails) return;
+        bill.customer = billingDetails.customer;
+        bill.paymentMethod = billingDetails.paymentMethod;
 
         try {
             if (printerMode === 'ble' && bluetoothCharacteristic) {
