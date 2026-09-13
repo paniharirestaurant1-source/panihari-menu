@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root { --gold: #D4AF37; --dark: #0a0a0a; --red: #e63946; --green: #10b981; --orange: #f59e0b; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -194,6 +195,14 @@
         .party-entry-table input:focus { border-color:var(--gold); }
         .party-entry-table .serial { width:42px; text-align:center; color:rgba(255,255,255,.45); }
         .party-remove { width:34px; height:34px; border-radius:.5rem; background:rgba(230,57,70,.1); color:var(--red); border:1px solid rgba(230,57,70,.25); cursor:pointer; }
+
+        .extra-modal-backdrop { position:fixed; inset:0; z-index:500; display:none; align-items:center; justify-content:center; padding:1rem; background:rgba(0,0,0,.82); backdrop-filter:blur(8px); }
+        .extra-modal-backdrop.open { display:flex; }
+        .extra-modal { width:min(100%,520px); background:#111; border:1px solid rgba(212,175,55,.4); border-radius:1.25rem; padding:1.25rem; box-shadow:0 24px 80px rgba(0,0,0,.6); }
+        .extra-grid { display:grid; grid-template-columns:1fr 110px 130px; gap:.75rem; }
+        .extra-field { width:100%; margin-top:.35rem; padding:.75rem; border-radius:.7rem; border:1px solid rgba(255,255,255,.12); background:#080808; color:#fff; outline:none; }
+        .extra-field:focus { border-color:var(--gold); box-shadow:0 0 0 2px rgba(212,175,55,.1); }
+        @media (max-width:600px) { .extra-grid { grid-template-columns:1fr 1fr; } .extra-dish-field { grid-column:1/-1; } }
     </style>
 </head>
 <body>
@@ -303,6 +312,38 @@
 
     </div>
 
+    <!-- EXISTING ORDER ME EXTRA ITEM -->
+    <div id="extraItemModal" class="extra-modal-backdrop" onclick="if(event.target===this) closeExtraItemModal()">
+        <div class="extra-modal">
+            <div class="flex items-start justify-between gap-3 mb-5">
+                <div>
+                    <h2 class="font-luxury text-xl" style="color:var(--gold)">ADD EXTRA ITEM</h2>
+                    <p id="extraItemOrderLabel" class="text-xs text-white/40 mt-1">Existing order</p>
+                </div>
+                <button class="printer-btn" onclick="closeExtraItemModal()" aria-label="Close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="extra-grid">
+                <label class="text-xs text-white/50 extra-dish-field">ITEM NAME
+                    <input id="extraItemName" class="extra-field" type="text" placeholder="e.g. Tawa Roti" autocomplete="off">
+                </label>
+                <label class="text-xs text-white/50">QUANTITY
+                    <input id="extraItemQty" class="extra-field" type="number" min="1" step="1" value="1">
+                </label>
+                <label class="text-xs text-white/50">UNIT PRICE
+                    <input id="extraItemPrice" class="extra-field" type="number" min="0" step="0.01" placeholder="Rs.">
+                </label>
+            </div>
+            <label class="block text-xs text-white/50 mt-3">KITCHEN NOTE (OPTIONAL)
+                <input id="extraItemNote" class="extra-field" type="text" placeholder="e.g. less butter">
+            </label>
+            <p class="text-[11px] text-white/35 mt-4 leading-relaxed">Item isi order aur final bill me add hoga. Kitchen ke liye sirf is extra item ki nayi EXTRA K.O.T print hogi.</p>
+            <div class="flex flex-col-reverse sm:flex-row justify-end gap-2 mt-5">
+                <button class="printer-btn" onclick="closeExtraItemModal()">CANCEL</button>
+                <button id="saveExtraItemBtn" class="btn-clear" onclick="addExtraItemAndPrint()"><i class="fas fa-plus mr-1"></i> ADD &amp; PRINT EXTRA K.O.T</button>
+            </div>
+        </div>
+    </div>
+
     <script>
     // ===== FIREBASE CONFIG (MENU WALA SAME) =====
     const firebaseConfig = {
@@ -323,6 +364,7 @@
     let soundEnabled = true;
     let knownOrderIds = new Set();
     let billRequestedTables = new Set();
+    let activeExtraOrderId = null;
 
     // ===== THERMAL PRINTER STATE =====
     let printerMode = null; // 'ble' | 'serial' | null
@@ -871,6 +913,7 @@ function playBeep() {
                         <div class="flex flex-col gap-2 w-full">
                             ${isNew ? `<button class="btn-preparing w-full" onclick="markPreparing('${id}')"><i class="fas fa-fire-burner mr-1"></i> START</button>` : ''}
                             ${!isDone ? `<button class="btn-complete w-full" onclick="markDone('${id}')"><i class="fas fa-check mr-1"></i> COMPLETE</button>` : ''}
+                            ${!isDone ? `<button class="btn-print w-full" style="color:var(--gold);border-color:rgba(212,175,55,.45)" onclick="openExtraItemModal('${id}')"><i class="fas fa-plus mr-1"></i> ADD EXTRA ITEM</button>` : ''}
                             <button class="btn-print w-full" onclick="printKOT('${id}')"><i class="fas fa-kitchen-set mr-1"></i> PRINT K.O.T</button>
                             <button class="btn-print w-full ${billRequested ? 'bill-requested' : ''}" onclick="printOrderBill('${id}')"><i class="fas fa-receipt mr-1"></i> ${billRequested ? 'PRINT BILL • REQUESTED' : 'PRINT BILL'}</button>
                             <button class="btn-delete w-full" onclick="deleteSingleOrder('${id}')"><i class="fas fa-trash mr-1"></i> DELETE</button>
@@ -1140,6 +1183,156 @@ function playBeep() {
         };
     }
 
+    function buildUpiPaymentUri(bill) {
+        const amount = Math.max(0, money(bill && bill.total)).toFixed(2);
+        const billNo = String((bill && bill.billNo) || ('PANIHARI-' + Date.now()));
+        const params = new URLSearchParams({
+            pa: '9829110931@airtel',
+            pn: 'Prakash Saini',
+            am: amount,
+            cu: 'INR',
+            tn: 'Panihari Bill ' + billNo,
+            tr: billNo
+        });
+        return 'upi://pay?' + params.toString();
+    }
+
+    function createDynamicQrDataUrl(value) {
+        if (typeof QRCode === 'undefined') return '';
+        const holder = document.createElement('div');
+        holder.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:320px;height:320px;background:#fff';
+        document.body.appendChild(holder);
+        try {
+            new QRCode(holder, {
+                text: String(value),
+                width: 320,
+                height: 320,
+                colorDark: '#000000',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.M
+            });
+            const canvas = holder.querySelector('canvas');
+            const image = holder.querySelector('img');
+            return canvas ? canvas.toDataURL('image/png') : (image ? image.src : '');
+        } finally {
+            holder.remove();
+        }
+    }
+
+    function openExtraItemModal(orderId) {
+        const order = allOrders[orderId];
+        if (!order) { showToast('Order nahi mila'); return; }
+        if (order.status === 'done') { showToast('Completed order me item add nahi ho sakta'); return; }
+        activeExtraOrderId = orderId;
+        document.getElementById('extraItemOrderLabel').textContent =
+            'TABLE ' + (order.table || '?') + ' • ' + (order.orderNo || orderId.slice(-6).toUpperCase());
+        document.getElementById('extraItemName').value = '';
+        document.getElementById('extraItemQty').value = '1';
+        document.getElementById('extraItemPrice').value = '';
+        document.getElementById('extraItemNote').value = '';
+        document.getElementById('extraItemModal').classList.add('open');
+        setTimeout(() => document.getElementById('extraItemName').focus(), 50);
+    }
+
+    function closeExtraItemModal() {
+        document.getElementById('extraItemModal').classList.remove('open');
+        activeExtraOrderId = null;
+    }
+
+    async function printSupplementaryKOT(kot, reservedWindow) {
+        if (printerMode === 'ble' && bluetoothCharacteristic) {
+            await writeBluetooth(buildEscPosKOT(kot));
+            showToast('EXTRA K.O.T Printed - TABLE ' + kot.table);
+            return;
+        }
+        if (printerMode === 'serial' && serialWriter) {
+            await writeSerial(buildEscPosKOT(kot));
+            showToast('EXTRA K.O.T Printed - TABLE ' + kot.table);
+            return;
+        }
+        if (printKOTWithBrowser(kot, reservedWindow)) showToast('EXTRA K.O.T Print Dialog Opened');
+    }
+
+    async function addExtraItemAndPrint() {
+        const orderId = activeExtraOrderId;
+        const existing = allOrders[orderId];
+        if (!orderId || !existing) { showToast('Order nahi mila'); return; }
+
+        const name = document.getElementById('extraItemName').value.trim();
+        const qty = Number(document.getElementById('extraItemQty').value);
+        const price = Number(document.getElementById('extraItemPrice').value);
+        const note = document.getElementById('extraItemNote').value.trim();
+        if (!name) { alert('Extra item ka naam bharein.'); return; }
+        if (!Number.isInteger(qty) || qty < 1) { alert('Quantity 1 ya usse zyada honi chahiye.'); return; }
+        if (!Number.isFinite(price) || price < 0) { alert('Sahi unit price bharein.'); return; }
+
+        const now = new Date().toISOString();
+        const batchNo = Object.keys(existing.extraBatches || {}).length + 1;
+        const batchId = db.ref('orders/' + orderId + '/extraBatches').push().key;
+        const item = { name, qty, price: money(price), sub: money(price * qty), source: 'extra', extraBatchId: batchId, addedAt: now };
+        if (note) item.note = note;
+        const kot = {
+            orderId,
+            orderNo: (existing.orderNo || orderId.slice(-6).toUpperCase()) + '-E' + batchNo,
+            table: existing.table || '?',
+            items: [item],
+            time: now,
+            isExtra: true
+        };
+
+        const directPrinterReady =
+            (printerMode === 'ble' && bluetoothCharacteristic) ||
+            (printerMode === 'serial' && serialWriter);
+        const reservedWindow = directPrinterReady ? null : window.open('', '_blank', 'width=430,height=700');
+        if (!directPrinterReady && !reservedWindow) {
+            alert('Popup blocked hai. Extra item save karne se pehle browser me popups allow karein, taki EXTRA K.O.T print ho sake.');
+            return;
+        }
+        if (reservedWindow) {
+            reservedWindow.document.write('<!doctype html><title>Preparing EXTRA K.O.T</title><body style="font-family:Arial;padding:30px">Extra item save ho raha hai...</body>');
+            reservedWindow.document.close();
+        }
+
+        const btn = document.getElementById('saveExtraItemBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> SAVING...';
+
+        try {
+            const result = await db.ref('orders/' + orderId).transaction(order => {
+                if (!order || order.status === 'done') return;
+                const items = Array.isArray(order.items) ? order.items.slice() : [];
+                items.push(item);
+                const subtotal = money(items.reduce((sum, row) => {
+                    const rowPrice = money(row.price);
+                    const rowQty = money(row.qty || 1) || 1;
+                    return sum + money(row.sub || (rowPrice * rowQty));
+                }, 0));
+                const gst = money(subtotal * 0.05);
+                order.items = items;
+                order.subtotal = subtotal;
+                order.gst = gst;
+                order.total = money(subtotal + gst);
+                order.updatedAt = now;
+                order.extraBatches = order.extraBatches || {};
+                order.extraBatches[batchId] = { batchNo, time: now, items: [item], kotPrintedAt: now };
+                return order;
+            });
+            if (!result.committed) throw new Error('Order completed ya delete ho chuka hai.');
+
+            document.getElementById('extraItemModal').classList.remove('open');
+            activeExtraOrderId = null;
+            await printSupplementaryKOT(kot, reservedWindow);
+            showToast(name + ' x' + qty + ' order aur final bill me add ho gaya');
+        } catch (err) {
+            if (reservedWindow && !reservedWindow.closed) reservedWindow.close();
+            console.error('Extra item error:', err);
+            alert('Extra item add nahi hua: ' + (err.message || err));
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-plus mr-1"></i> ADD & PRINT EXTRA K.O.T';
+        }
+    }
+
     function escPosQrCommands(value) {
         const encoder = new TextEncoder();
         const data = encoder.encode(String(value));
@@ -1274,7 +1467,7 @@ function playBeep() {
         t(line + '\n');
         b(ESC,0x61,0x01);
         t('SCAN TO PAY\n');
-        chunks.push(escPosQrCommands('upi://pay?pa=9829110931@airtel&pn=Prakash%20Saini&cu=INR'));
+        chunks.push(escPosQrCommands(buildUpiPaymentUri(bill)));
         t('\nPrakash Saini\n9829110931@airtel\n');
         b(ESC,0x61,0x01);
         b(ESC,0x45,0x01); t('Terms & Conditions\n'); b(ESC,0x45,0x00);
@@ -1328,6 +1521,12 @@ function playBeep() {
                 <div class="qty">x${escapeHtml(fmtQty(item.qty))}</div>
             </div>`).join('');
         const dt = formatBillDateParts(bill.time);
+        const upiPaymentUri = buildUpiPaymentUri(bill);
+        const qrDataUri = createDynamicQrDataUrl(upiPaymentUri);
+        if (!qrDataUri) {
+            alert('Amount wala payment QR load nahi hua. Internet check karke page refresh karein, phir bill print karein.');
+            return false;
+        }
 
         const w = window.open('', '_blank', 'width=430,height=900');
         if (!w) {
@@ -1358,8 +1557,8 @@ function playBeep() {
             .tax-head,.tax-row { display:grid; grid-template-columns:1fr 20mm 15mm; text-align:right; gap:1mm; }
             .tax-head span:first-child,.tax-row span:first-child { text-align:left; }
             .terms { margin-top:2mm; font-size:8.5px; }
-            .pay-qr-crop { width:28mm; height:28mm; overflow:hidden; position:relative; margin:1.5mm auto .5mm; background:#fff; }
-            .pay-qr-crop img { position:absolute; width:53.8mm; height:auto; left:-12.9mm; top:-32.4mm; }
+            .pay-qr { width:29mm; height:29mm; object-fit:contain; display:block; margin:1.5mm auto .5mm; image-rendering:pixelated; }
+            .pay-amount { font-size:11px; font-weight:900; margin:.5mm 0; }
         </style></head><body>
             <div class="center">
                 <img class="logo" src="panihari-logo-original.png" alt="Panihari Veg. Restaurant logo">
@@ -1394,7 +1593,7 @@ function playBeep() {
             <div class="tax-row"><span>GST@5%</span><span>${fmtMoney(bill.subtotal)}</span><span>${fmtMoney(bill.gst)}</span></div>
             <div class="total-row" style="margin-top:1.5mm;font-weight:900"><span></span><span>Total Tax: ${fmtMoney(bill.gst)}</span></div>
             <div class="dash"></div>
-            <div class="center"><b>SCAN TO PAY</b><div class="pay-qr-crop"><img src="panihari-payment-qr.jpeg" alt="Prakash Saini payment QR"></div><span class="small">Prakash Saini · 9829110931@airtel</span></div>
+            <div class="center"><b>SCAN TO PAY</b><img class="pay-qr" src="${qrDataUri}" alt="Payment QR with bill amount"><div class="pay-amount">PAY ${fmtMoney(bill.total)}</div><span class="small">Prakash Saini · 9829110931@airtel</span></div>
             <div class="dash"></div>
             <div class="center terms"><b>Terms &amp; Conditions</b><br>Thank you for doing business with<br>us.</div>
         </body></html>`);
@@ -1529,6 +1728,7 @@ function playBeep() {
 
     function buildEscPosKOT(kot) {
         const ESC = 0x1B, GS = 0x1D;
+        const kotTitle = kot.isExtra ? 'EXTRA K.O.T' : 'K.O.T';
         const chunks = [];
         const encoder = new TextEncoder();
         const b = (...arr) => chunks.push(new Uint8Array(arr));
@@ -1536,13 +1736,19 @@ function playBeep() {
         const line = '-'.repeat(RECEIPT_COLUMNS);
         const dt = formatBillDateParts(kot.time);
         b(ESC,0x40,ESC,0x61,0x01,ESC,0x45,0x01,GS,0x21,0x11);
-        t('K.O.T\n');
+        t(kotTitle + '\n');
         b(GS,0x21,0x00,ESC,0x45,0x00);
         t(PANIHARI_INFO.name + '\n' + line + '\n');
         b(ESC,0x61,0x00,ESC,0x45,0x01);
         t(twoCol('TABLE: ' + kot.table, 'KOT: ' + kot.orderNo) + '\n');
         b(ESC,0x45,0x00);
         t(twoCol(dt.date, dt.time) + '\n' + line + '\n');
+        if (kot.isExtra) {
+            b(ESC,0x61,0x01,ESC,0x45,0x01);
+            t('ADD-ON ITEMS ONLY\n');
+            b(ESC,0x61,0x00,ESC,0x45,0x00);
+            t(line + '\n');
+        }
         kot.items.forEach(item => {
             b(ESC,0x45,0x01);
             t('x' + fmtQty(item.qty || 1) + '  ' + String(item.name || 'Item') + '\n');
@@ -1558,14 +1764,15 @@ function playBeep() {
         return out;
     }
 
-    function printKOTWithBrowser(kot) {
+    function printKOTWithBrowser(kot, existingWindow = null) {
         const dt = formatBillDateParts(kot.time);
-        const rows = kot.items.map(item => `<div class="item"><b>x${escapeHtml(fmtQty(item.qty || 1))}</b><span>${escapeHtml(item.name || 'Item')}</span></div>`).join('');
-        const w = window.open('', '_blank', 'width=430,height=700');
+        const kotTitle = kot.isExtra ? 'EXTRA K.O.T' : 'K.O.T';
+        const rows = kot.items.map(item => `<div class="item"><b>x${escapeHtml(fmtQty(item.qty || 1))}</b><span>${escapeHtml(item.name || 'Item')}${item.note ? `<small style="display:block">Note: ${escapeHtml(item.note)}</small>` : ''}</span></div>`).join('');
+        const w = existingWindow || window.open('', '_blank', 'width=430,height=700');
         if (!w) { alert('Print window block ho gaya. Popup allow karke dobara PRINT K.O.T dabayein.'); return false; }
         w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>KOT-${escapeHtml(kot.orderNo)}</title><style>
             @page{size:58mm auto;margin:2mm}*{box-sizing:border-box}body{width:54mm;margin:0 auto;color:#000;font-family:"Courier New",monospace;font-size:12px}.center{text-align:center}.title{font-size:24px;font-weight:900}.dash{border-top:1px dashed #000;margin:2mm 0}.row{display:flex;justify-content:space-between;font-weight:800}.item{display:grid;grid-template-columns:10mm 1fr;gap:2mm;padding:2mm 0;border-bottom:1px dotted #777;font-size:14px}.copy{font-weight:900;margin-top:3mm}
-        </style></head><body><div class="center title">K.O.T</div><div class="center"><b>${escapeHtml(PANIHARI_INFO.name)}</b></div><div class="dash"></div><div class="row"><span>TABLE: ${escapeHtml(kot.table)}</span><span>KOT: ${escapeHtml(kot.orderNo)}</span></div><div class="row"><span>${escapeHtml(dt.date)}</span><span>${escapeHtml(dt.time)}</span></div><div class="dash"></div>${rows}<div class="dash"></div><div class="center copy">KITCHEN COPY</div></body></html>`);
+        </style></head><body><div class="center title">${escapeHtml(kotTitle)}</div><div class="center"><b>${escapeHtml(PANIHARI_INFO.name)}</b></div><div class="dash"></div><div class="row"><span>TABLE: ${escapeHtml(kot.table)}</span><span>KOT: ${escapeHtml(kot.orderNo)}</span></div><div class="row"><span>${escapeHtml(dt.date)}</span><span>${escapeHtml(dt.time)}</span></div>${kot.isExtra ? '<div class="center copy">ADD-ON ITEMS ONLY</div>' : ''}<div class="dash"></div>${rows}<div class="dash"></div><div class="center copy">KITCHEN COPY</div></body></html>`);
         w.document.close(); w.focus(); setTimeout(() => w.print(), 250); return true;
     }
 
@@ -1780,3 +1987,4 @@ db.ref('waiter_calls').on('child_added', (snapshot) => {
     </script>
 </body>
 </html>
+
